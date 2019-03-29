@@ -1,3 +1,3 @@
 {
-  "test": "this is just a test"
+  "test": "this is just a test!"
 }
