@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
+<title>Reverse engineering a wireless repeater - Part I | Patrick Costa</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Reverse engineering a wireless repeater - Part I" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Do you have an old router left behind in your room? Ever wondered how it really worked inside? Sit tight and get ready, because this is going to be a series of blog posts about reverse engineering a wireless repeater. The methodology here can be applied to other IoT devices." />
+<meta property="og:description" content="Do you have an old router left behind in your room? Ever wondered how it really worked inside? Sit tight and get ready, because this is going to be a series of blog posts about reverse engineering a wireless repeater. The methodology here can be applied to other IoT devices." />
+<link rel="canonical" href="http://localhost:4000/2019/04/01/re-wireless-repeater.html" />
+<meta property="og:url" content="http://localhost:4000/2019/04/01/re-wireless-repeater.html" />
+<meta property="og:site_name" content="Patrick Costa" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-01T17:21:00-03:00" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/04/01/re-wireless-repeater.html","headline":"Reverse engineering a wireless repeater - Part I","dateModified":"2019-04-01T17:21:00-03:00","datePublished":"2019-04-01T17:21:00-03:00","description":"Do you have an old router left behind in your room? Ever wondered how it really worked inside? Sit tight and get ready, because this is going to be a series of blog posts about reverse engineering a wireless repeater. The methodology here can be applied to other IoT devices.","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/01/re-wireless-repeater.html"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Patrick Costa" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Patrick Costa</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Reverse engineering a wireless repeater - Part I</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-04-01T17:21:00-03:00" itemprop="datePublished">Apr 1, 2019
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Do you have an old router left behind in your room? Ever wondered how it really
+worked inside? Sit tight and get ready, because this is going to be a series of
+blog posts about reverse engineering a wireless repeater. The methodology here
+can be applied to other IoT devices.</p>
+
+<p>For the first part, we are going to understand the basics and learn how to
+collect information about our target. If you have any questions, please leave
+a comment below so I can improve this article.</p>
+
+<h1 id="what-is-a-firmware">What is a firmware?</h1>
+
+<p>The term “firmware” was firstly used in a magazine, published in 1967, and it
+was referring to the CPU microcode existent between the hardware and the
+software. Today, the term is more broadly used to refer to the BIOS,
+bootloaders or embedded management systems.</p>
+
+<p>There are many different kinds of firmwares files. It could be a complete
+operation system with custom drivers and user applications, or it could contain
+only the user applications. Sometimes, it could be composed only of partial
+updates for an application, for example, the front-end of an embedded web
+server.</p>
+
+<h1 id="why-should-we-do-this">Why should we do this?</h1>
+
+<p>SOHO routers are the front door of your home network, therefore, a security
+issue in this device might compromise all the connected clients. On the other
+hand, SOHO routers are known for having security issues that are widely
+exploited by malwares. In addition, the source code of the firmware is usually
+not public. Unless someone does a reverse engineering on it, we won’t be able
+to know what is actually running inside it.</p>
+
+<p>Another motivation is learning. Reversing SOHO routers is a good way to study
+about common low-level vulnerabilities and reversing due to its simplicity
+compared to modern systems.</p>
+
+<h1 id="information-gathering">Information gathering</h1>
+
+<p>For our case study we are going to use an old wireless repeater named
+<strong>NPLUG</strong>, previously offered by the brazilian company <strong>Intelbras</strong>.
+Unfortunately, I couldn’t find this product on their website anymore, but this
+is actually good for everyone. :)</p>
+
+<p>Firstly, it is good to gather as much information about the device as you can.
+This allows us to get a general idea of how it works and uncover some weakness
+without the need to look inside. An easy way to do that is looking for the FCC
+ID number of the device. The FCC ID is the registration number of that device in
+Federal Communications Commission of United States. Using this number you can
+find more information like user manuals, specifications and internal pictures.</p>
+
+<p>Once you have that number you can search for it using sites like <a href="https://fccid.io/">FCC
+ID.io</a> or the official <a href="https://www.fcc.gov/oet/ea/fccid">FCC</a> page. Depending on where are
+your device distributed you might not find a FCC ID number on it, but another
+certification number instead.</p>
+
+<p>In Brazil, Anatel is the agency responsible for registering and regulating electronic devices.
+Taking a look at the back of our device, between other information, we can find
+a number near the Anatel logo. This is the Anatel’s certification number and,
+fortunately, <a href="https://fccid.io/">FCC ID.io</a> has a database for that too.</p>
+
+<p><img src="/assets/nplug/nplug.png" alt="NPLUG wireless repeater" /></p>
+
+<p>I couldn’t find much information (beyond what was on the vendor’s website)
+about the device using this number. However, if you are into embedded devices
+you might have noticed similarities between the NPLUG and other wireless
+repeaters. I had the same feeling and while looking at similar devices I
+discovered a “cousin” of NPLUG, which is the <a href="https://www.aliexpress.com/item/English-Firmware-Tenda-A5S-Mini-Router-Pocket-WiFi-Wireless-Router-Client-Universal-Repeater-WISP-150Mbps-Ethernet/32751330210.html">Tenda A5s</a>.</p>
+
+<p>Searching for “<em>fcc id tenda a5s</em>”, I was able to find the <a href="https://fccid.io/V7TA5S">FCC
+ID.io</a> page for the Tenda product and within it I could internal
+pictures of the device. Looking at the information found I realized that both
+devices are almost the same. They were just sold with a different name, by a
+different company, in a different country. This is something that was
+previously pointed out by other security researchers. The code reuse between
+router manufacturers has propagated not only the same features but also the
+same security holes between devices.</p>
+
+<p><img src="/assets/nplug/internal.png" alt="Internal photos Tenda A5S" /></p>
+<center>
+  <small>
+    Source: https://fccid.io/V7TA5S/Internal-Photos/Internal-Photos-1889450
+  </small>
+</center>
+<p><br /></p>
+
+<h1 id="firmware-acquisition">Firmware acquisition</h1>
+
+<p>The vendor website usually provides a download section where you can get
+manuals and the firmware file. If this is not the case you might get lucky
+searching for it in your search engine. When none of the above options is
+available you need to extract the firmware image from the hardware using one of
+the techniques that will be briefly descibed on the next part.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>This is all for now. I hope I had increased your appetite for what is coming
+next.  Make sure you subscribe to the RSS feed and follow me on Twitter so you
+can see when the Part 2 is released.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="http://s3.eurecom.fr/docs/bh13us_zaddach.pdfk">Zaddach, J., &amp; Costin, A. (2013). Embedded devices security and firmware
+reverse engineering. Black-Hat USA.</a></li>
+  <li><a href="https://www.fcc.gov/oet/ea/fccid">FCC ID Search Form</a></li>
+  <li><a href="https://fccid.io/">FCC ID.io</a></li>
+</ul>
+
+
+  </div><a class="u-url" href="/2019/04/01/re-wireless-repeater.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Patrick Costa</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name"></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/patrickrbc"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">patrickrbc</span></a></li><li><a href="https://www.twitter.com/patrickrbc"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">patrickrbc</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+<script async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-137241651-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-137241651-1');
+    </script>
+  </body>
+
+</html>
