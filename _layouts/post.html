@@ -1,5 +1,6 @@
 ---
 layout: default
+comments: true
 ---
 <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
@@ -19,7 +20,7 @@ layout: default
     {{ content }}
   </div>
 
-  {%- if site.disqus.shortname -%}
+  {%- if site.disqus -%}
     {%- include disqus_comments.html -%}
   {%- endif -%}
 
