@@ -26,8 +26,11 @@ github_username:  patrickrbc
 # Build settings
 markdown: kramdown
 theme: minima
+
 disqus:
   shortname: https-patrickrbc-com
+
+permalink: /:categories/:year/:month/:day/:title
 
 plugins:
   - jekyll-feed
