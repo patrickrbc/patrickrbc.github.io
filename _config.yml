@@ -27,6 +27,8 @@ github_username:  patrickrbc
 markdown: kramdown
 theme: minima
 
+highlighter: rouge
+
 disqus:
   shortname: https-patrickrbc-com
 

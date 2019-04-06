@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
+<title>Cryptopals - The basics | patrickrbc</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Cryptopals - The basics" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises. I have just finished the first set but I can guarantee you that it is a lot of fun and learning." />
+<meta property="og:description" content="If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises. I have just finished the first set but I can guarantee you that it is a lot of fun and learning." />
+<link rel="canonical" href="http://localhost:4000/2019/04/06/cryptopals-the-basics" />
+<meta property="og:url" content="http://localhost:4000/2019/04/06/cryptopals-the-basics" />
+<meta property="og:site_name" content="patrickrbc" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-06T16:42:00-03:00" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/04/06/cryptopals-the-basics","headline":"Cryptopals - The basics","dateModified":"2019-04-06T16:42:00-03:00","datePublished":"2019-04-06T16:42:00-03:00","description":"If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises. I have just finished the first set but I can guarantee you that it is a lot of fun and learning.","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/06/cryptopals-the-basics"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="patrickrbc" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">patrickrbc</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Cryptopals - The basics</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-04-06T16:42:00-03:00" itemprop="datePublished">Apr 6, 2019
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>If you have <strong>any</strong> kind of interest in crypto you should probably check this out.
+Recently, I started doing the <strong>Cryptopals</strong> which are a series of cryptography
+challenges created by the formerly Matasano Security team. They are a
+collection of 48 exercises. I have just finished the first set but I can
+guarantee you that it is a lot of fun and learning.</p>
+
+<p><strong>SPOILER ALERT</strong>: This is post will give the solutions for the first set of
+exercises, if you are planning about doing it you should definitely stop
+reading and try them by yourself. However, if you are still unsure if this is
+for you or not, maybe try skim reading through this post to see if you get the
+taste for it.</p>
+
+<p>Resolving the first set was mix of love and hate feelings. Sometimes I was
+able to get the idea but ended up making a programming mistake that making me
+stuck for while in one challenge or another. They stated in their website
+that this is a “relatively easy” challenge with the except of one. I can’t
+tell you about the further sets but one challenge in this set took me 2 days
+to get it right</p>
+
+<p>I decided to write my solutions in Node.js and this was a good way to learn
+about some quirks of the language that you might not face in a common daily
+programming session. You might want to choose a new programming language to
+kill two birds with one stone.</p>
+
+<h1 id="challenge-1-convert-hex-to-base64">Challenge 1: Convert hex to base64</h1>
+
+<p>There is no mystery in here. If you were dealing with client-side JavaScript
+you would be looking for atob and btoa, but in Node.js you will want to be
+familiar with the Buffer API. Needless to 
+say, you shouldn’t include any third-party libraries to solve the challenges.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Buffer</span>
+<span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="s1">'49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'</span><span class="p">,</span><span class="s1">'hex'</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'base64'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><br /></p>
+<h1 id="challenge-2-fixed-xor">Challenge 2: Fixed XOR</h1>
+
+<p>This challenge will introduce you to XOR operation for cryptographic purposes.
+The simple XOR cipher is a type of additive cipher that was used in the past to
+encrypt text, but it is clearly not safe since the ciphertext could be
+decrypted using frequency analysis. However, the XOR operation is still
+frequently used in more complex ciphers, due to its simplicity and performance.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="challenge-3-single-byte-xor-cipher">Challenge 3: Single-byte XOR cipher</h1>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="challenge-4-detect-single-character-xor">Challenge 4: Detect single-character XOR</h1>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="challenge-5-implement-repeating-key-xor">Challenge 5: Implement repeating-key XOR</h1>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="challenge-6-break-repeating-key-xor">Challenge 6: Break repeating-key XOR</h1>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="challenge-7-aes-in-ecb-mode">Challenge 7: AES in ECB mode</h1>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="challenge-8-detect-aes-in-ecb-mode">Challenge 8: Detect AES in ECB mode</h1>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+
+<h1 id="what-we-have-learned">What we have learned?</h1>
+
+<p>I am planning on doing the other sets soon and I will probably release the
+solutions on Github and make my comments about them here. Stay tuned!</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li>[Tutte, William T. “Fish and I.”][fish-19</li>
+</ul>
+
+
+  </div>
+<a class="u-url" href="/2019/04/06/cryptopals-the-basics" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">patrickrbc</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name"></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/patrickrbc"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">patrickrbc</span></a></li><li><a href="https://www.twitter.com/patrickrbc"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">patrickrbc</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+<script async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-137241651-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-137241651-1');
+    </script>
+  </body>
+
+</html>
