@@ -90,11 +90,73 @@ encrypt text, but it is clearly not safe since the ciphertext could be
 decrypted using frequency analysis. However, the XOR operation is still
 frequently used in more complex ciphers, due to its simplicity and performance.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+<p>In order to reuse code some of the functions used in these challenges were
+created in a separated file. Since XOR is a commonly used operation, I decided
+to create a function that will XOR two buffers repeating the smallest one which
+would be the key.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">cipher</span> <span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nx">key</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+    <span class="p">[</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">key</span><span class="p">,</span> <span class="nx">msg</span><span class="p">]</span>
+
+  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">alloc</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">,</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">^</span> <span class="nx">key</span><span class="p">[</span><span class="nx">j</span> <span class="o">%</span> <span class="nx">key</span><span class="p">.</span><span class="nx">length</span><span class="p">]</span>
+
+  <span class="k">return</span> <span class="nx">result</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h1 id="challenge-3-single-byte-xor-cipher">Challenge 3: Single-byte XOR cipher</h1>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+<p>Now that we already know how to cipher and decipher messages using XOR, things are going
+to start becoming interesting. The challenge presents an hex encoded string
+that was XOR’d against a single character and asks us to discover this key and
+decrypt the message.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+  This will receive a message and XOR every character in it with a byte which
+  is our key. We will try all possible characters with ASCII code from 0 to 256
+  (this range was arbitrary).
+*/</span>
+<span class="kd">function</span> <span class="nx">breakSingleByte</span> <span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">plainText</span><span class="p">,</span> <span class="nx">tempBuffer</span>
+  <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">keyChar</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span> <span class="nx">keyChar</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">keyChar</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="nx">tempBuffer</span> <span class="o">=</span> <span class="nx">cipher</span><span class="p">(</span>
+      <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="s1">'hex'</span><span class="p">),</span>
+      <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">(</span><span class="nx">keyChar</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="nx">plainText</span> <span class="o">=</span> <span class="nx">tempBuffer</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span>
+
+<span class="cm">/*
+  If the resultant string has only printable characters, it will have its
+  character frequency computed and it will be added to the results array
+*/</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="sr">/</span><span class="se">[^\x</span><span class="sr">00-</span><span class="se">\x</span><span class="sr">7E</span><span class="se">]</span><span class="sr">/g</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">plainText</span><span class="p">))</span>
+      <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+        <span class="na">key</span><span class="p">:</span> <span class="nx">keyChar</span><span class="p">,</span>
+        <span class="na">message</span><span class="p">:</span> <span class="nx">plainText</span><span class="p">,</span>
+        <span class="na">score</span><span class="p">:</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">Util</span><span class="p">.</span><span class="nx">calculateFrequency</span><span class="p">(</span><span class="nx">plainText</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+      <span class="p">})</span>
+  <span class="p">}</span>
+
+  <span class="c1">// The string with the best score in the results array will be returned </span>
+  <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">sort</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&lt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span><span class="p">)</span> <span class="p">?</span> <span class="mi">1</span> <span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nx">shift</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>If everything is working fine we will get the decrypted message:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cooking MC\'s like a pound of bacon
+</code></pre></div></div>
+
+<p><br /></p>
 
 <h1 id="challenge-4-detect-single-character-xor">Challenge 4: Detect single-character XOR</h1>
 

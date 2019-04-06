@@ -53,15 +53,79 @@ decrypted using frequency analysis. However, the XOR operation is still
 frequently used in more complex ciphers, due to its simplicity and performance.
 
 
+In order to reuse code some of the functions used in these challenges were
+created in a separated file. Since XOR is a commonly used operation, I decided
+to create a function that will XOR two buffers repeating the smallest one which
+would be the key.
+
 ```javascript
+function cipher (msg, key) {
+
+  if (key.length > msg.length)
+    [msg, key] = [key, msg]
+
+  var result = Buffer.alloc(msg.length)
+
+  for (var i = 0, j = 0, len = msg.length; i < len; i++, j++)
+    result[i] = msg[i] ^ key[j % key.length]
+
+  return result
+}
 ```
 
 
 # Challenge 3: Single-byte XOR cipher
 
+Now that we already know how to cipher and decipher messages using XOR, things are going
+to start becoming interesting. The challenge presents an hex encoded string
+that was XOR'd against a single character and asks us to discover this key and
+decrypt the message.
+
+
+
 ```javascript
+/*
+  This will receive a message and XOR every character in it with a byte which
+  is our key. We will try all possible characters with ASCII code from 0 to 256
+  (this range was arbitrary).
+*/
+function breakSingleByte (msg) {
+  var plainText, tempBuffer
+  var results = []
+
+  for (let keyChar = 0, len = 256; keyChar < len; keyChar++) {
+
+    tempBuffer = cipher(
+      Buffer.from(msg, 'hex'),
+      Buffer.from(String.fromCharCode(keyChar))
+    )
+
+    plainText = tempBuffer.toString()
+
+/*
+  If the resultant string has only printable characters, it will have its
+  character frequency computed and it will be added to the results array
+*/
+    if (!/[^\x00-\x7E]/g.test(plainText))
+      results.push({
+        key: keyChar,
+        message: plainText,
+        score: parseFloat(Util.calculateFrequency(plainText).toFixed(6))
+      })
+  }
+
+  // The string with the best score in the results array will be returned 
+  return results.sort((x, y) => (x.score < y.score) ? 1 : -1).shift()
+}
 ```
 
+If everything is working fine we will get the decrypted message:
+
+```
+Cooking MC\'s like a pound of bacon
+```
+
+<br>
 
 # Challenge 4: Detect single-character XOR
 
