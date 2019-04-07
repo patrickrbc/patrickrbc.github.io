@@ -39,7 +39,9 @@ familiar with the Buffer API. Needless to
 say, you shouldn’t include any third-party libraries to solve the challenges.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/set1/1.js 3 6 %}
+var result = Buffer
+  .from('49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d','hex')
+  .toString('base64')
 {% endhighlight %}
 
 <br>
@@ -70,7 +72,34 @@ analysing the character frequency of the output messages. The output with the
 best score is probably the message decrypted.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 22 50 %}
+/**
+ * Break a single-byte XOR cipher and returns the message with the best score
+ * @param {String} hex encoded ciphertext
+ * @return {Object} key, msg and score
+ */
+function breakSingleByte (ciphertext) {
+  var plainText, tempBuffer
+  var results = []
+
+  for (let keyChar = 0, len = 256; keyChar < len; keyChar++) {
+
+    tempBuffer = cipher(
+      Buffer.from(ciphertext, 'hex'),
+      Buffer.from(String.fromCharCode(keyChar))
+    )
+
+    plainText = tempBuffer.toString()
+
+    if (!/[^\x00-\x7E]/g.test(plainText))
+      results.push({
+        key: keyChar,
+        msg: plainText,
+        score: parseFloat(Util.calculateFrequency(plainText).toFixed(6))
+      })
+  }
+
+  return results.reduce((x, y) => (x && x.score > y.score) ? x : y, 0)
+}
 {% endhighlight %}
 
 If everything works fine, we will get the decrypted message:
@@ -90,7 +119,19 @@ can use the function from the previous challenge to brute-force each string as
 a single-byte XOR cipher and find out the one with the best score. 
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/set1/4.js 8 21 %}
+var decrypted = [], result
+
+strings.forEach((string, index) => {
+  result = XOR.breakSingleByte(string)
+
+  if (result) {
+    result.string = string
+    result.line   = index + 1
+    decrypted.push(result)
+  }
+})
+
+result = decrypted.reduce((x, y) => x.score > y.score ? x : y)
 {% endhighlight %}
 
 If everything works fine, we will get the decrypted message:
@@ -116,7 +157,24 @@ will XOR two buffers repeating the smallest one which would be the key. This
 function could be used with fixed or repeating-key XOR.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 3 21 %}
+/**
+ * XOR two buffers repeating the smallest
+ * @param {Buffer} msg
+ * @param {Buffer} key
+ * @return {Buffer} result
+ */
+function cipher (msg, key) {
+
+  if (key.length > msg.length)
+    [msg, key] = [key, msg]
+
+  var result = Buffer.alloc(msg.length)
+
+  for (var i = 0, j = 0, len = msg.length; i < len; i++, j++)
+    result[i] = msg[i] ^ key[j % key.length]
+
+  return result
+}
 {% endhighlight %}
 
 Ciphering the message with the above function and converting the result to a
@@ -138,7 +196,45 @@ the number of different position between two symbols. In this case, we need to
 calculate the number of differing bits between the two strings.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/lib/util.js 22 61 %}
+/**
+* Calculates the Hamming distance between two strings
+* @param {String} string1
+* @param {String} string2
+* @return {Number} distance 
+*/
+function calculateDistance (string1, string2) {
+  var distance = 0
+  var first, second
+
+  string1 = Buffer.from(string1 || '0', 'ascii')
+  string2 = Buffer.from(string2 || '0', 'ascii')
+
+  // compose the binary representation of the strings 
+  for (let i = 0, len = string1.length; i < len; i++)
+    first += dec2bin(string1[i])
+
+  for (let i = 0, len = string2.length; i < len; i++)
+    second += dec2bin(string2[i])
+
+  // count the number of different bits
+  for (let i = 0, len = first.length; i < len; i++)
+    if (first[i] ^ second[i])
+      distance++
+
+  return distance
+}
+
+/**
+* Converts a decimal number to a 8 char binary representation
+* @param {Number} decimal number
+* @return {String} binary representation
+*/
+function dec2bin (dec) {
+  var binaryNum = (dec >>> 0).toString(2);
+  while (binaryNum.length < 8)
+    binaryNum = '0' + binaryNum
+  return binaryNum
+}
 {% endhighlight %}
 
 The first thing you need to do is to figure out the size of the key. Unless you
@@ -146,7 +242,22 @@ have a crystal ball at home, you can start guessing. They suggest values from 2
 to 40. 
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 51 67 %}
+/**
+* Test all key sizes from 2 to 40 and returns the best one
+* @param {String} msg
+* @return {Number} keysize
+*/
+function findKeySize (msg) {
+  var results = []
+
+  for (let keysize = 2, len = 40; keysize <= len; keysize++)
+    results.push({
+      keysize : keysize,
+      score   : testKeySize(msg, keysize)
+    })
+
+  return results.reduce((x, y) => x.score < y.score ? x : y).keysize
+}
 {% endhighlight %}
 
 If you are wondering what kind of test is that, no worries, they explain you
@@ -157,7 +268,26 @@ KEYSIZE which gives the least distance between the chunks of bytes in the
 ciphertext is probably the right one.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 68 88 %}
+/**
+* Given a message and the size of a key, returns the average hamming distance
+* of between chunks of that message
+* @param {String} msg
+* @param {Number} keysize
+* @return {Number} distance
+*/
+function testKeySize (msg, keysize) {
+  var first, second
+  const TESTS = 50 // arbitrary
+  var score   = 0
+
+  for (let i = 0, len = TESTS; i < len; i++) {
+    first  = msg.slice(keysize * i, keysize * (i + 1))
+    second = msg.slice(keysize * (i + 2), keysize * (i + 3))
+    score += Util.calculateDistance(first, second)
+  }
+
+  return score / (TESTS * keysize)
+}
 {% endhighlight %}
 
 Once you have the KEYSIZE, you can use the following strategy to solve the
@@ -173,7 +303,15 @@ challenge:
  6. Decipher the message with the key you obtained.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/set1/6.js 6 15 %}
+var key, keysize, blocks, msg, result
+var keyScores = []
+
+msg     = Buffer.from(fs.readFileSync('../res/6.txt', 'utf-8'), 'base64')
+keysize = XOR.findKeySize(msg)
+blocks  = Util.divideInBlocks(msg, keysize)
+blocks  = Util.transposeBlocks(blocks, keysize)
+key     = findKey(blocks)
+result  = XOR.cipher(msg, key).toString()
 {% endhighlight %}
 
 Using this key against the file will give you the lyrics of [this
@@ -192,7 +330,18 @@ of block ciphers are DES, RC5, Blowfish, AES. The following code will do the
 job of decrypting a base64 encoded ciphertext in Node.js:
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/lib/aes.js 3 15 %}
+/**
+* Decrypts a AES ciphertext with a given key and algorithm
+* @param {String} ciphertext
+* @param {String} key
+* @param {String} algorithm
+* @return {String} msg
+*/
+function decrypt (ciphertext, key, alg) {
+  var decipher = crypto.createDecipheriv(alg, key, null)
+  var out = decipher.update(ciphertext, 'base64', 'utf-8')
+  return out += decipher.final('utf-8')
+}
 {% endhighlight %}
 
 If everything works fine, we will get the same lyrics of the previous
@@ -212,7 +361,17 @@ detect which ciphertext was encrypted in ECB mode, you will count the
 repetitions.
 
 {% highlight javascript %}
-{% github_sample /patrickrbc/cryptopals/blob/master/set1/8.js 8 19 %}
+ciphertexts.forEach((ciphertext, index) => {
+  var cipherTextBlocks = Util.divideInBlocks(ciphertext, 16)
+
+  cipherTextBlocks.forEach((block, i) => {
+    results.push({
+      line: index + 1,
+      ciphertext: ciphertext,
+      repetitions: Util.countRepetitions(block, cipherTextBlocks)
+    })
+  })
+})
 {% endhighlight %}
 
 <br>
