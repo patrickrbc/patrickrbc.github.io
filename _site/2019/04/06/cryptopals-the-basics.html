@@ -15,7 +15,7 @@
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2019-04-06T16:42:00-03:00" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/2019/04/06/cryptopals-the-basics","headline":"Cryptopals - The basics","dateModified":"2019-04-06T16:42:00-03:00","datePublished":"2019-04-06T16:42:00-03:00","description":"If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises divided in 8 sets. I have just finished the first set but I can guarantee you that it is a lot of fun and learning.","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/06/cryptopals-the-basics"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+{"dateModified":"2019-04-06T16:42:00-03:00","datePublished":"2019-04-06T16:42:00-03:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/06/cryptopals-the-basics"},"url":"http://localhost:4000/2019/04/06/cryptopals-the-basics","description":"If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises divided in 8 sets. I have just finished the first set but I can guarantee you that it is a lot of fun and learning.","@type":"BlogPosting","headline":"Cryptopals - The basics","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="patrickrbc" /></head>
 <body><header class="site-header" role="banner">
@@ -75,10 +75,9 @@ you would be looking for atob and btoa, but in Node.js you will want to be
 familiar with the Buffer API. Needless to 
 say, you shouldn’t include any third-party libraries to solve the challenges.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Buffer</span>
-<span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="s1">'49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'</span><span class="p">,</span><span class="s1">'hex'</span><span class="p">)</span>
-<span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'base64'</span><span class="p">)</span>
-</code></pre></div></div>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">Buffer</span>
+  <span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="s1">'49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'</span><span class="p">,</span><span class="s1">'hex'</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'base64'</span><span class="p">)</span></code></pre></figure>
 
 <p><br /></p>
 
@@ -87,9 +86,9 @@ say, you shouldn’t include any third-party libraries to solve the challenges.<
 <p>This challenge will introduce you to XOR operation for cryptographic purposes.
 The <strong>simple XOR cipher</strong> is a type of additive cipher that was used in the
 past to encrypt text, but it is clearly not safe since the ciphertext could be
-decrypted using frequency analysis. On the other hand, the XOR operation is
-still frequently used in more complex ciphers, due to its simplicity and
-performance.</p>
+decrypted using character frequency analysis. On the other hand, the XOR
+operation is still frequently used in more complex ciphers, due to its
+simplicity and performance.</p>
 
 <p>The challenges asks for a function that takes two equal-length buffers and
 produces their XOR combination. A solution for this exercise would be to loop
@@ -100,45 +99,41 @@ other buffer. The code that can do this will be shown further in this post.</p>
 
 <h1 id="challenge-3-single-byte-xor-cipher">Challenge 3: Single-byte XOR cipher</h1>
 
-<p>Now that we already know how to cipher and decipher messages using XOR, things are going
-to start becoming interesting. The challenge presents an hex encoded string
-that was XOR’d against a single character and asks us to discover this key and
-decrypt the message.</p>
+<p>Now that we already know how to cipher and decipher messages using XOR, things
+are going to start to become interesting. The challenge presents an hex encoded
+string that was XOR’d against a single character and require us to discover
+this key and decrypt the message. This can be achieved by brute-forcing the key
+and analysing the character frequency of the output messages. The output with
+best score is probably the message decrypted.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
-  This will receive a message and XOR every character in it with a byte which
-  is our key. We will try all possible characters with ASCII code from 0 to 256
-  (this range was arbitrary).
-*/</span>
-<span class="kd">function</span> <span class="nx">breakSingleByte</span> <span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
+ * Break a single-byte XOR cipher and returns the message with the best score
+ * @param {String} hex encoded ciphertext
+ * @return {Object} key, msg and score
+ */</span>
+<span class="kd">function</span> <span class="nx">breakSingleByte</span> <span class="p">(</span><span class="nx">ciphertext</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">plainText</span><span class="p">,</span> <span class="nx">tempBuffer</span>
   <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">keyChar</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span> <span class="nx">keyChar</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">keyChar</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="nx">tempBuffer</span> <span class="o">=</span> <span class="nx">cipher</span><span class="p">(</span>
-      <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="s1">'hex'</span><span class="p">),</span>
+      <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="s1">'hex'</span><span class="p">),</span>
       <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">(</span><span class="nx">keyChar</span><span class="p">))</span>
     <span class="p">)</span>
 
     <span class="nx">plainText</span> <span class="o">=</span> <span class="nx">tempBuffer</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span>
 
-<span class="cm">/*
-  If the resultant string has only printable characters, it will have its
-  character frequency computed and it will be added to the results array
-*/</span>
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="sr">/</span><span class="se">[^\x</span><span class="sr">00-</span><span class="se">\x</span><span class="sr">7E</span><span class="se">]</span><span class="sr">/g</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">plainText</span><span class="p">))</span>
       <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
         <span class="na">key</span><span class="p">:</span> <span class="nx">keyChar</span><span class="p">,</span>
-        <span class="na">message</span><span class="p">:</span> <span class="nx">plainText</span><span class="p">,</span>
+        <span class="na">msg</span><span class="p">:</span> <span class="nx">plainText</span><span class="p">,</span>
         <span class="na">score</span><span class="p">:</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">Util</span><span class="p">.</span><span class="nx">calculateFrequency</span><span class="p">(</span><span class="nx">plainText</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
       <span class="p">})</span>
   <span class="p">}</span>
 
-  <span class="c1">// The string with the best score in the results array will be returned </span>
-  <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">sort</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&lt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span><span class="p">)</span> <span class="p">?</span> <span class="mi">1</span> <span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nx">shift</span><span class="p">()</span>
-<span class="p">}</span>
-</code></pre></div></div>
+  <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">x</span> <span class="o">&amp;&amp;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&gt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span><span class="p">)</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
 
 <p>If everything works fine, we will get the decrypted message:</p>
 
@@ -149,16 +144,16 @@ decrypt the message.</p>
 
 <h1 id="challenge-4-detect-single-character-xor">Challenge 4: Detect single-character XOR</h1>
 
-<p>This time we were given a file containing a lot of encrypted strings. The Goal
-was to find it, but we know from the previous exercise that decrypting it would
-be really easy too.</p>
+<p>This time we were given a file containing a lot of encrypted strings. The goal
+was to find the string that was encrypted with single XOR, but we know from the
+previous exercise that decrypting it would be really easy too. We can use the
+function from the previous challenge to calculate the best single-character key
+for each string, then, the string with the best score is probably the answer.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">strings</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readfilesync</span><span class="p">(</span><span class="s1">'../res/4.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s1">'</span><span class="err">\</span><span class="s1">n'</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">decrypted</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">result</span>
 
-<span class="kd">var</span> <span class="nx">decrypted</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">result</span>
-
-<span class="nx">strings</span><span class="p">.</span><span class="nx">foreach</span><span class="p">((</span><span class="nx">string</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-  <span class="nx">result</span> <span class="o">=</span> <span class="nx">xor</span><span class="p">.</span><span class="nx">breaksinglebyte</span><span class="p">(</span><span class="nx">string</span><span class="p">)</span>
+<span class="nx">strings</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">string</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">result</span> <span class="o">=</span> <span class="nx">XOR</span><span class="p">.</span><span class="nx">breakSingleByte</span><span class="p">(</span><span class="nx">string</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">result</span><span class="p">.</span><span class="nx">string</span> <span class="o">=</span> <span class="nx">string</span>
@@ -166,7 +161,8 @@ be really easy too.</p>
     <span class="nx">decrypted</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
   <span class="p">}</span>
 <span class="p">})</span>
-</code></pre></div></div>
+
+<span class="nx">result</span> <span class="o">=</span> <span class="nx">decrypted</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&gt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">)</span></code></pre></figure>
 
 <p>If everything works fine, we will get the decrypted message:</p>
 
@@ -177,18 +173,24 @@ be really easy too.</p>
 
 <h1 id="challenge-5-implement-repeating-key-xor">Challenge 5: Implement repeating-key XOR</h1>
 
-<p>This challenge is similar to the second one, but this time the message length
+<p>This challenge is similar to the Challenge #2, but this time the message length
 is bigger than the key length and we will use the <a href="https://en.wikipedia.org/wiki/Vigenère_cipher">Vigenère
 cipher</a>. In this case, the key
-to be repeated to cipher the whole message. Maybe this challenge could be
-placed after the second one.</p>
+needs to be repeated to cipher the whole message. Maybe this challenge could be
+positioned after the second one.</p>
 
-<p>In order to reuse code some of the functions used in these challenges were
+<p>In order to reuse code, some of the functions used in these challenges were
 created in a separated file. Since XOR is a commonly used operation, I decided
 to create a function that will XOR two buffers repeating the smallest one which
 would be the key.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">cipher</span> <span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
+ * XOR two buffers repeating the smallest
+ * @param {Buffer} msg
+ * @param {Buffer} key
+ * @return {Buffer} result
+ */</span>
+<span class="kd">function</span> <span class="nx">cipher</span> <span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
 
   <span class="k">if</span> <span class="p">(</span><span class="nx">key</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
     <span class="p">[</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">key</span><span class="p">,</span> <span class="nx">msg</span><span class="p">]</span>
@@ -199,8 +201,10 @@ would be the key.</p>
     <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">^</span> <span class="nx">key</span><span class="p">[</span><span class="nx">j</span> <span class="o">%</span> <span class="nx">key</span><span class="p">.</span><span class="nx">length</span><span class="p">]</span>
 
   <span class="k">return</span> <span class="nx">result</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<span class="p">}</span></code></pre></figure>
+
+<p>Ciphering the message with the above function and converting the result to a
+hex string will give the expected output.</p>
 
 <p><br /></p>
 
@@ -209,65 +213,140 @@ would be the key.</p>
 <p><em>“It is officially on, now.”</em>
 This one took me a while to make it work right. They give you a file containing
 a message that is encrypted with repeating-xor and encoded in base64. This
-where you put together everything you learned until now. Fortunately, they give
-you the steps to do it.</p>
+challenge is then you put together everything you learned until now.
+Fortunately, they give you the steps to do it.</p>
+
+<p>In order to get this one right, you will need to use something called the
+<a href="https://en.wikipedia.org/wiki/Hamming_distance">Hamming distance</a>, which is
+the number of different position between two symbols. In this case, we need to
+calculate the number of differing bits between the two buffers.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript">  <span class="c1">// compose the binary representation of the strings </span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">string1</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">first</span> <span class="o">+=</span> <span class="nx">dec2bin</span><span class="p">(</span><span class="nx">string1</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">string2</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">second</span> <span class="o">+=</span> <span class="nx">dec2bin</span><span class="p">(</span><span class="nx">string2</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+
+  <span class="c1">// count the number of different bits</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">first</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">first</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">^</span> <span class="nx">second</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+      <span class="nx">distance</span><span class="o">++</span>
+
+  <span class="k">return</span> <span class="nx">distance</span>
+<span class="p">}</span>
+
+<span class="cm">/**
+* Converts a decimal number to a 8 char binary representation
+* @param {Number} decimal number
+* @return {String} binary representation
+*/</span>
+<span class="kd">function</span> <span class="nx">dec2bin</span> <span class="p">(</span><span class="nx">dec</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">binaryNum</span> <span class="o">=</span> <span class="p">(</span><span class="nx">dec</span> <span class="o">&gt;&gt;&gt;</span> <span class="mi">0</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="nx">binaryNum</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="nx">binaryNum</span> <span class="o">=</span> <span class="s1">'0'</span> <span class="o">+</span> <span class="nx">binaryNum</span>
+  <span class="k">return</span> <span class="nx">binaryNum</span>
+<span class="p">}</span></code></pre></figure>
 
 <p>The first thing you need to do is to figure out the size of the key. Unless you
 have a crystal ball at home, you can start guessing. They suggest values from 2
 to 40.</p>
 
-<h4 id="the-hamming-distance">The hamming distance</h4>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
+* Test all key sizes from 2 to 40 and returns the best one
+* @param {String} msg
+* @return {Number} keysize
+*/</span>
+<span class="kd">function</span> <span class="nx">findKeySize</span> <span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[]</span>
 
-<p>todo</p>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">keysize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span> <span class="nx">keysize</span> <span class="o">&lt;=</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">keysize</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+      <span class="na">keysize</span> <span class="p">:</span> <span class="nx">keysize</span><span class="p">,</span>
+      <span class="na">score</span>   <span class="p">:</span> <span class="nx">testKeySize</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span>
+    <span class="p">})</span>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+  <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&lt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">).</span><span class="nx">keysize</span>
+<span class="p">}</span></code></pre></figure>
 
-<p>Now, using each of the guessed key sizes do the following steps:</p>
+<p>If you are wondering what kind of test is that, no worries, they explain you
+how to do it. It basically consists of getting the two chunks of KEYSIZE bytes
+from the ciphertext, compute the Hamming distance between them. Repeat this
+process a couple of times and normalize the result. The KEYSIZE with the best
+output it is probably the right one.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
+* Given a message and the size of a key, returns the average hamming distance
+* of between chunks of that message
+* @param {String} msg
+* @param {Number} keysize
+* @return {Number} distance
+*/</span>
+<span class="kd">function</span> <span class="nx">testKeySize</span> <span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span>
+  <span class="kd">const</span> <span class="nx">TESTS</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1">// arbitrary</span>
+  <span class="kd">var</span> <span class="nx">score</span>   <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">TESTS</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">first</span>  <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">keysize</span> <span class="o">*</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">keysize</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="nx">second</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">keysize</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="nx">keysize</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="nx">score</span> <span class="o">+=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">calculateDistance</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">score</span> <span class="o">/</span> <span class="p">(</span><span class="nx">TESTS</span> <span class="o">*</span> <span class="nx">keysize</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Once you have the KEYSIZE, you can use the following strategy to solve the
+challenge:</p>
 
 <ol>
-  <li>Divide the message in KEYSIZE worth of bytes</li>
-  <li>Calculate the hamming distance between them and normalize dividing by the
-   KEYSIZE</li>
-  <li>Find the KEYSIZE with smallest normalized hamming distance</li>
-</ol>
-
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
-
-<p>Once you have the KEYSIZE, you can use the following strategy to discover the
-key:</p>
-
-<ol>
-  <li>Break the ciphertext into blocks of KEYSIZE length</li>
+  <li>Divide the ciphertext into blocks of KEYSIZE length;</li>
   <li>Transpose the blocks: make a block that is the first byte of every block,
-and a block that is the second byte of every block, and so on.</li>
-  <li>Solve each block as it was single-character XOR</li>
+and a block that is the second byte of every block, and so on;</li>
+  <li>Solve each block as it was single-character XOR;</li>
   <li>For each block, the single-byte XOR key that produces the best output is
-the XOR key byte for that block.</li>
-  <li>Put them together and you have the key</li>
+the XOR key byte for that block;</li>
+  <li>Put them together and you have the key;</li>
+  <li>Decipher the message with the key you obtained.</li>
 </ol>
 
-<p>Using this key against the file will give you the lyrics of <a href="">this song</a>.</p>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">,</span> <span class="nx">blocks</span><span class="p">,</span> <span class="nx">msg</span><span class="p">,</span> <span class="nx">result</span>
+<span class="kd">var</span> <span class="nx">keyScores</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="nx">msg</span>     <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s1">'../res/6.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">),</span> <span class="s1">'base64'</span><span class="p">)</span>
+<span class="nx">keysize</span> <span class="o">=</span> <span class="nx">XOR</span><span class="p">.</span><span class="nx">findKeySize</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span>
+<span class="nx">blocks</span>  <span class="o">=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">divideInBlocks</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span>
+<span class="nx">blocks</span>  <span class="o">=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">transposeBlocks</span><span class="p">(</span><span class="nx">blocks</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span>
+<span class="nx">key</span>     <span class="o">=</span> <span class="nx">findKey</span><span class="p">(</span><span class="nx">blocks</span><span class="p">)</span>
+<span class="nx">result</span>  <span class="o">=</span> <span class="nx">XOR</span><span class="p">.</span><span class="nx">cipher</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">).</span><span class="nx">toString</span><span class="p">()</span></code></pre></figure>
+
+<p>Using this key against the file will give you the lyrics of <a href="https://www.youtube.com/watch?v=zNJ8_Dh3Onk">this
+song</a>.</p>
 
 <p><br /></p>
 
 <h1 id="challenge-7-aes-in-ecb-mode">Challenge 7: AES in ECB mode</h1>
 
-<p>After solving the previous challenge the last two are pretty seemed like a walk
-in a park. This is an introduction to the block cipher AES.</p>
+<p>After solving the previous challenge the last two seemed like a walk in the
+park. This is an introduction to the block cipher
+<a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a>. A <a href="https://en.wikipedia.org/wiki/Block_cipher#Rijndael_">block
+cipher</a> is a
+deterministic algorithm which operates on fixed-length groups of bits. Examples
+of block ciphers are DES, RC5, Blowfish, AES. The following code will do the
+job of decrypting in Node.js:</p>
 
-<p>A block cipher is…
-https://en.wikipedia.org/wiki/Block_cipher#Rijndael_</p>
-
-<p>Examples: DES, RC5, Blowfish, AES</p>
-
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">decrypt</span> <span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">decipher</span> <span class="o">=</span> <span class="nx">crypto</span><span class="p">.</span><span class="nx">createDecipheriv</span><span class="p">(</span><span class="s1">'aes-128-ecb'</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span>
-  <span class="kd">var</span> <span class="nx">out</span> <span class="o">=</span> <span class="nx">decipher</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="s1">'base64'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">)</span>
-  <span class="nx">out</span> <span class="o">+=</span> <span class="nx">decipher</span><span class="p">.</span><span class="kr">final</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="nx">out</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
+* Decrypts a AES ciphertext with a given key and algorithm
+* @param {String} ciphertext
+* @param {String} key
+* @param {String} algorithm
+* @return {String} msg
+*/</span>
+<span class="kd">function</span> <span class="nx">decrypt</span> <span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">alg</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">decipher</span> <span class="o">=</span> <span class="nx">crypto</span><span class="p">.</span><span class="nx">createDecipheriv</span><span class="p">(</span><span class="nx">alg</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span>
+  <span class="kd">var</span> <span class="nx">out</span> <span class="o">=</span> <span class="nx">decipher</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="s1">'base64'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nx">out</span> <span class="o">+=</span> <span class="nx">decipher</span><span class="p">.</span><span class="kr">final</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
 
 <p>If everything works fine, we will get the same lyrics of the previous
 challenge.</p>
@@ -277,42 +356,49 @@ challenge.</p>
 <h1 id="challenge-8-detect-aes-in-ecb-mode">Challenge 8: Detect AES in ECB mode</h1>
 
 <p>This challenges requires you to find which one of the ciphertexts in a file was
-encrytpted with AES in ECB mode. The ECB mode is…</p>
+encrytpted with AES in ECB mode. The ECB mode is simplest mode of encryption in
+which the message is divided into blocks and they are independently encrypted.
+The problem with this mode is that a block is always encrypted into the same
+ciphertext block. This is exactly the weakness you need to abuse in order to
+detect which ciphertext was encrypted in ECB mode.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">ciphertexts</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">cipherTextBlocks</span> <span class="o">=</span> <span class="nx">divideInBlocks</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">ciphertexts</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">cipherTextBlocks</span> <span class="o">=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">divideInBlocks</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
 
   <span class="nx">cipherTextBlocks</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">block</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
     <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
       <span class="na">line</span><span class="p">:</span> <span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
       <span class="na">ciphertext</span><span class="p">:</span> <span class="nx">ciphertext</span><span class="p">,</span>
-      <span class="na">repetitions</span><span class="p">:</span> <span class="nx">countRepetitions</span><span class="p">(</span><span class="nx">block</span><span class="p">,</span> <span class="nx">cipherTextBlocks</span><span class="p">)</span>
+      <span class="na">repetitions</span><span class="p">:</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">countRepetitions</span><span class="p">(</span><span class="nx">block</span><span class="p">,</span> <span class="nx">cipherTextBlocks</span><span class="p">)</span>
     <span class="p">})</span>
   <span class="p">})</span>
-<span class="p">})</span>
-</code></pre></div></div>
+<span class="p">})</span></code></pre></figure>
 
 <p><br /></p>
 
-<h1 id="what-we-have-learned">What we have learned?</h1>
-
-<p>-
- -
- -</p>
-
 <h1 id="conclusion">Conclusion</h1>
 
-<p>I am planning on doing the other sets soon and I will probably release the
+<p>The complete source code of the solutions you can find on my
+<a href="https://github.com/patrickrbc/cryptopals">Github</a>. If you solved this first
+set of exercises you have the knowledge of performing the following tasks:</p>
+
+<ul>
+  <li>Convert between data base64, hex, binary</li>
+  <li>Detect and decrypt single-character XOR ciphers</li>
+  <li>Break repeating-key XOR ciphers</li>
+  <li>Detect and decipher AES in ECB mode</li>
+</ul>
+
+<p>I am planning on doing the other sets soon. I will probably release the
 solutions on Github and make my comments about them here. Stay tuned!</p>
 
 <p><br /></p>
 
 <h1 id="references">References</h1>
-
 <ul>
+  <li><a href="https://cryptopals.com">The cryptopals crypto challenges</a></li>
   <li><a href="https://uwaterloo.ca/combinatorics-and-optimization/sites/ca.combinatorics-and-optimization/files/uploads/files/corr98-39.pdf">Tutte, William T. “Fish and I.”</a></li>
 </ul>
-
 
   </div>
 <a class="u-url" href="/2019/04/06/cryptopals-the-basics" hidden></a>

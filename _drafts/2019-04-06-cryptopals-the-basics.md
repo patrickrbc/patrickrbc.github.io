@@ -37,11 +37,9 @@ you would be looking for atob and btoa, but in Node.js you will want to be
 familiar with the Buffer API. Needless to 
 say, you shouldn’t include any third-party libraries to solve the challenges.
 
-```javascript
-Buffer
-.from('49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d','hex')
-.toString('base64')
-```
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/set1/1.js 3 6 %}
+{% endhighlight %}
 
 <br>
 
@@ -50,9 +48,9 @@ Buffer
 This challenge will introduce you to XOR operation for cryptographic purposes.
 The **simple XOR cipher** is a type of additive cipher that was used in the
 past to encrypt text, but it is clearly not safe since the ciphertext could be
-decrypted using frequency analysis. On the other hand, the XOR operation is
-still frequently used in more complex ciphers, due to its simplicity and
-performance.
+decrypted using character frequency analysis. On the other hand, the XOR
+operation is still frequently used in more complex ciphers, due to its
+simplicity and performance.
 
 The challenges asks for a function that takes two equal-length buffers and
 produces their XOR combination. A solution for this exercise would be to loop
@@ -63,48 +61,16 @@ other buffer. The code that can do this will be shown further in this post.
 
 # Challenge 3: Single-byte XOR cipher
 
-Now that we already know how to cipher and decipher messages using XOR, things are going
-to start becoming interesting. The challenge presents an hex encoded string
-that was XOR'd against a single character and asks us to discover this key and
-decrypt the message.
+Now that we already know how to cipher and decipher messages using XOR, things
+are going to start to become interesting. The challenge presents an hex encoded
+string that was XOR'd against a single character and require us to discover
+this key and decrypt the message. This can be achieved by brute-forcing the key
+and analysing the character frequency of the output messages. The output with
+best score is probably the message decrypted.
 
-
-
-```javascript
-/*
-  This will receive a message and XOR every character in it with a byte which
-  is our key. We will try all possible characters with ASCII code from 0 to 256
-  (this range was arbitrary).
-*/
-function breakSingleByte (msg) {
-  var plainText, tempBuffer
-  var results = []
-
-  for (let keyChar = 0, len = 256; keyChar < len; keyChar++) {
-
-    tempBuffer = cipher(
-      Buffer.from(msg, 'hex'),
-      Buffer.from(String.fromCharCode(keyChar))
-    )
-
-    plainText = tempBuffer.toString()
-
-/*
-  If the resultant string has only printable characters, it will have its
-  character frequency computed and it will be added to the results array
-*/
-    if (!/[^\x00-\x7E]/g.test(plainText))
-      results.push({
-        key: keyChar,
-        message: plainText,
-        score: parseFloat(Util.calculateFrequency(plainText).toFixed(6))
-      })
-  }
-
-  // The string with the best score in the results array will be returned 
-  return results.sort((x, y) => (x.score < y.score) ? 1 : -1).shift()
-}
-```
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 22 50 %}
+{% endhighlight %}
 
 If everything works fine, we will get the decrypted message:
 
@@ -116,25 +82,15 @@ Cooking MC\'s like a pound of bacon
 
 # Challenge 4: Detect single-character XOR
 
-This time we were given a file containing a lot of encrypted strings. The Goal
-was to find it, but we know from the previous exercise that decrypting it would
-be really easy too.
+This time we were given a file containing a lot of encrypted strings. The goal
+was to find the string that was encrypted with single XOR, but we know from the
+previous exercise that decrypting it would be really easy too. We can use the
+function from the previous challenge to calculate the best single-character key
+for each string, then, the string with the best score is probably the answer.
 
-```javascript
-var strings = fs.readfilesync('../res/4.txt', 'utf-8').split('\n')
-
-var decrypted = [], result
-
-strings.foreach((string, index) => {
-  result = xor.breaksinglebyte(string)
-
-  if (result) {
-    result.string = string
-    result.line   = index + 1
-    decrypted.push(result)
-  }
-})
-```
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/set1/4.js 8 21 %}
+{% endhighlight %}
 
 If everything works fine, we will get the decrypted message:
 
@@ -147,32 +103,23 @@ Now that the party is jumping\n
 
 # Challenge 5: Implement repeating-key XOR
 
-This challenge is similar to the second one, but this time the message length
+This challenge is similar to the Challenge #2, but this time the message length
 is bigger than the key length and we will use the [Vigenère
 cipher](https://en.wikipedia.org/wiki/Vigenère_cipher). In this case, the key
-to be repeated to cipher the whole message. Maybe this challenge could be
-placed after the second one.
+needs to be repeated to cipher the whole message. Maybe this challenge could be
+positioned after the second one.
 
-In order to reuse code some of the functions used in these challenges were
+In order to reuse code, some of the functions used in these challenges were
 created in a separated file. Since XOR is a commonly used operation, I decided
 to create a function that will XOR two buffers repeating the smallest one which
 would be the key.
 
-```javascript
-function cipher (msg, key) {
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 3 21 %}
+{% endhighlight %}
 
-  if (key.length > msg.length)
-    [msg, key] = [key, msg]
-
-  var result = Buffer.alloc(msg.length)
-
-  for (var i = 0, j = 0, len = msg.length; i < len; i++, j++)
-    result[i] = msg[i] ^ key[j % key.length]
-
-  return result
-}
-```
-
+Ciphering the message with the above function and converting the result to a
+hex string will give the expected output.
 
 <br>
 
@@ -181,65 +128,70 @@ function cipher (msg, key) {
 *"It is officially on, now."*
 This one took me a while to make it work right. They give you a file containing
 a message that is encrypted with repeating-xor and encoded in base64. This
-where you put together everything you learned until now. Fortunately, they give
-you the steps to do it.
+challenge is then you put together everything you learned until now.
+Fortunately, they give you the steps to do it.
+
+In order to get this one right, you will need to use something called the
+[Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance), which is
+the number of different position between two symbols. In this case, we need to
+calculate the number of differing bits between the two buffers.
+
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/lib/util.js 34 61 %}
+{% endhighlight %}
 
 The first thing you need to do is to figure out the size of the key. Unless you
 have a crystal ball at home, you can start guessing. They suggest values from 2
 to 40. 
 
-#### The hamming distance
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 51 67 %}
+{% endhighlight %}
 
-todo
+If you are wondering what kind of test is that, no worries, they explain you
+how to do it. It basically consists of getting the two chunks of KEYSIZE bytes
+from the ciphertext, compute the Hamming distance between them. Repeat this
+process a couple of times and normalize the result. The KEYSIZE with the best
+output it is probably the right one.
 
-```javascript
-```
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/lib/xor.js 68 88 %}
+{% endhighlight %}
 
-Now, using each of the guessed key sizes do the following steps:
+Once you have the KEYSIZE, you can use the following strategy to solve the
+challenge:
 
- 1. Divide the message in KEYSIZE worth of bytes
- 2. Calculate the hamming distance between them and normalize dividing by the
-   KEYSIZE
- 3. Find the KEYSIZE with smallest normalized hamming distance
-
-```javascript
-```
-
-Once you have the KEYSIZE, you can use the following strategy to discover the
-key:
-
- 1. Break the ciphertext into blocks of KEYSIZE length
+ 1. Divide the ciphertext into blocks of KEYSIZE length;
  2. Transpose the blocks: make a block that is the first byte of every block,
-    and a block that is the second byte of every block, and so on.
- 3. Solve each block as it was single-character XOR
+    and a block that is the second byte of every block, and so on;
+ 3. Solve each block as it was single-character XOR;
  4. For each block, the single-byte XOR key that produces the best output is
-    the XOR key byte for that block.
- 5. Put them together and you have the key
+    the XOR key byte for that block;
+ 5. Put them together and you have the key;
+ 6. Decipher the message with the key you obtained.
 
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/set1/6.js 6 15 %}
+{% endhighlight %}
 
-Using this key against the file will give you the lyrics of [this song]().
+Using this key against the file will give you the lyrics of [this
+song](https://www.youtube.com/watch?v=zNJ8_Dh3Onk).
 
 <br>
 
 # Challenge 7: AES in ECB mode
 
-After solving the previous challenge the last two are pretty seemed like a walk
-in a park. This is an introduction to the block cipher AES.
+After solving the previous challenge the last two seemed like a walk in the
+park. This is an introduction to the block cipher
+[AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard). A [block
+cipher](https://en.wikipedia.org/wiki/Block_cipher#Rijndael_) is a
+deterministic algorithm which operates on fixed-length groups of bits. Examples
+of block ciphers are DES, RC5, Blowfish, AES. The following code will do the
+job of decrypting in Node.js:
 
-A block cipher is...
-https://en.wikipedia.org/wiki/Block_cipher#Rijndael_
-
-Examples: DES, RC5, Blowfish, AES 
-
-```javascript
-function decrypt (input, key) {
-  var decipher = crypto.createDecipheriv('aes-128-ecb', key, null)
-  var out = decipher.update(input, 'base64', 'utf-8')
-  out += decipher.final('utf-8')
-
-  return out
-}
-```
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/lib/aes.js 3 15 %}
+{% endhighlight %}
 
 If everything works fine, we will get the same lyrics of the previous
 challenge.
@@ -250,39 +202,34 @@ challenge.
 # Challenge 8: Detect AES in ECB mode
 
 This challenges requires you to find which one of the ciphertexts in a file was
-encrytpted with AES in ECB mode. The ECB mode is...
+encrytpted with AES in ECB mode. The ECB mode is simplest mode of encryption in
+which the message is divided into blocks and they are independently encrypted.
+The problem with this mode is that a block is always encrypted into the same
+ciphertext block. This is exactly the weakness you need to abuse in order to
+detect which ciphertext was encrypted in ECB mode.
 
-```javascript
-ciphertexts.forEach((ciphertext, index) => {
-  var cipherTextBlocks = divideInBlocks(ciphertext, 16)
-
-  cipherTextBlocks.forEach((block, i) => {
-    results.push({
-      line: index + 1,
-      ciphertext: ciphertext,
-      repetitions: countRepetitions(block, cipherTextBlocks)
-    })
-  })
-})
-```
+{% highlight javascript %}
+{% github_sample /patrickrbc/cryptopals/blob/master/set1/8.js 8 19 %}
+{% endhighlight %}
 
 <br>
 
-# What we have learned?
-
- -
- -
- -
-
 # Conclusion
 
-I am planning on doing the other sets soon and I will probably release the
+The complete source code of the solutions you can find on my
+[Github](https://github.com/patrickrbc/cryptopals). If you solved this first
+set of exercises you have the knowledge of performing the following tasks:
+
+ - Convert between data base64, hex, binary
+ - Detect and decrypt single-character XOR ciphers 
+ - Break repeating-key XOR ciphers
+ - Detect and decipher AES in ECB mode
+
+I am planning on doing the other sets soon. I will probably release the
 solutions on Github and make my comments about them here. Stay tuned!
 
 <br>
 
 # References
-
- - [Tutte, William T. "Fish and I."][fish-1998]
-
-[fish-1998]: https://uwaterloo.ca/combinatorics-and-optimization/sites/ca.combinatorics-and-optimization/files/uploads/files/corr98-39.pdf
+ - [The cryptopals crypto challenges](https://cryptopals.com)
+ - [Tutte, William T. "Fish and I."](https://uwaterloo.ca/combinatorics-and-optimization/sites/ca.combinatorics-and-optimization/files/uploads/files/corr98-39.pdf)
