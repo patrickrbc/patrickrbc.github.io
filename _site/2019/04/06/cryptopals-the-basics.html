@@ -136,6 +136,32 @@ best score is probably the message decrypted.</p>
   <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">x</span> <span class="o">&amp;&amp;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&gt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span><span class="p">)</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="p">}</span></code></pre></figure>
 
+<p>To calculate the score of a string according to the frequency of english
+letters you can find the percentual values on the Internet and sum them. Don’t
+forget to add the space character to your list, it took me some time to notice
+that.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
+* Computes the score of a string according to the frequency of letters
+* @param {String} string
+* @return {Number} score
+*/</span>
+<span class="kd">function</span> <span class="nx">calculateFrequency</span> <span class="p">(</span><span class="nx">string</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="cm">/* Source: http://www.oxfordmathcenter.com/drupal7/node/353 */</span>
+  <span class="kd">const</span> <span class="nx">charFrequency</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'e'</span><span class="p">:</span> <span class="mf">0.12702</span><span class="p">,</span> <span class="s1">'t'</span><span class="p">:</span> <span class="mf">0.09056</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">:</span> <span class="mf">0.08167</span><span class="p">,</span> <span class="s1">'o'</span><span class="p">:</span> <span class="mf">0.07507</span><span class="p">,</span> <span class="s1">'i'</span><span class="p">:</span> <span class="mf">0.06966</span><span class="p">,</span>
+    <span class="s1">'n'</span><span class="p">:</span> <span class="mf">0.06749</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mf">0.06327</span><span class="p">,</span> <span class="s1">'h'</span><span class="p">:</span> <span class="mf">0.06094</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">:</span> <span class="mf">0.05987</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">:</span> <span class="mf">0.04253</span><span class="p">,</span>
+    <span class="s1">'l'</span><span class="p">:</span> <span class="mf">0.04025</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">:</span> <span class="mf">0.02782</span><span class="p">,</span> <span class="s1">'u'</span><span class="p">:</span> <span class="mf">0.02758</span><span class="p">,</span> <span class="s1">'m'</span><span class="p">:</span> <span class="mf">0.02406</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">:</span> <span class="mf">0.02360</span><span class="p">,</span>
+    <span class="s1">'f'</span><span class="p">:</span> <span class="mf">0.02228</span><span class="p">,</span> <span class="s1">'g'</span><span class="p">:</span> <span class="mf">0.02015</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">:</span> <span class="mf">0.01974</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">:</span> <span class="mf">0.01929</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">:</span> <span class="mf">0.01492</span><span class="p">,</span>
+    <span class="s1">'v'</span><span class="p">:</span> <span class="mf">0.00978</span><span class="p">,</span> <span class="s1">'k'</span><span class="p">:</span> <span class="mf">0.00772</span><span class="p">,</span> <span class="s1">'j'</span><span class="p">:</span> <span class="mf">0.00153</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">:</span> <span class="mf">0.00150</span><span class="p">,</span> <span class="s1">'q'</span><span class="p">:</span> <span class="mf">0.00095</span><span class="p">,</span>
+    <span class="s1">'z'</span><span class="p">:</span> <span class="mf">0.00074</span><span class="p">,</span> <span class="s1">' '</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">string</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s1">''</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">sum</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">sum</span> <span class="o">+</span> <span class="p">(</span><span class="nx">charFrequency</span><span class="p">[</span><span class="nx">value</span><span class="p">]</span> <span class="o">||</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
+
 <p>If everything works fine, we will get the decrypted message:</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cooking MC\'s like a pound of bacon
