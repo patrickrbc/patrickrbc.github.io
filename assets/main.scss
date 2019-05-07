@@ -1,0 +1,39 @@
+---
+---
+
+@import "minima";
+
+$text-color: #DDDDDD;
+$background-color: #2F2F2F;
+
+.night-mode:hover {
+  text-decoration: none;
+}
+
+body.dark {
+  background-color: $background-color;
+  color: $text-color;
+  transition: 0.2s;
+
+  a, a:visited {
+    color: $text-color;
+  }
+
+  .site-title, .site-title:visited, .site-nav .page-link, .footer-heading {
+    color: #FFC502;
+  }
+
+  .post-list-heading {
+    color: #828282;
+  }
+
+  a:hover {
+    color: white;
+  }
+
+  .highlight, .highlighter-rouge .highlight, pre, code {
+    background-color: $background-color;
+    border: 1px solid $background-color;
+    overflow: hidden;
+  }
+}

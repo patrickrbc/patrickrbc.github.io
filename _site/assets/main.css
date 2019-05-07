@@ -503,3 +503,23 @@ table {
     color: #008080; }
   .highlight .il {
     color: #099; }
+
+.night-mode:hover {
+  text-decoration: none; }
+
+body.dark {
+  background-color: #2F2F2F;
+  color: #DDDDDD;
+  transition: 0.2s; }
+  body.dark a, body.dark a:visited {
+    color: #DDDDDD; }
+  body.dark .site-title, body.dark .site-title:visited, body.dark .site-nav .page-link, body.dark .footer-heading {
+    color: #FFC502; }
+  body.dark .post-list-heading {
+    color: #828282; }
+  body.dark a:hover {
+    color: white; }
+  body.dark .highlight, body.dark .highlighter-rouge .highlight, body.dark pre, body.dark code {
+    background-color: #2F2F2F;
+    border: 1px solid #2F2F2F;
+    overflow: hidden; }

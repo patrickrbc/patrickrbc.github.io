@@ -30,3 +30,4 @@ gem "wdm", "~> 0.1.0" if Gem.win_platform?
 
 
 gem 'jekyll_github_sample'
+gem 'jekyll-sitemap'
