@@ -7,15 +7,15 @@
 <meta name="generator" content="Jekyll v3.7.4" />
 <meta property="og:title" content="Reverse engineering a wireless repeater - Part II" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to check the first part where I introduced the subject and explained how to gather some information without digging into the hardware. If you haven’t downloaded the file for our target device you can it here." />
-<meta property="og:description" content="This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to check the first part where I introduced the subject and explained how to gather some information without digging into the hardware. If you haven’t downloaded the file for our target device you can it here." />
+<meta name="description" content="This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to check the first part where I introduced the subject and explained how to gather some information without digging into the hardware. If you still haven’t downloaded the firmware of our target device you can get it here." />
+<meta property="og:description" content="This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to check the first part where I introduced the subject and explained how to gather some information without digging into the hardware. If you still haven’t downloaded the firmware of our target device you can get it here." />
 <link rel="canonical" href="http://localhost:4000/2019/05/07/re-wireless-repeater-2" />
 <meta property="og:url" content="http://localhost:4000/2019/05/07/re-wireless-repeater-2" />
 <meta property="og:site_name" content="patrickrbc" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2019-05-07T15:34:00-03:00" />
 <script type="application/ld+json">
-{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/05/07/re-wireless-repeater-2"},"url":"http://localhost:4000/2019/05/07/re-wireless-repeater-2","headline":"Reverse engineering a wireless repeater - Part II","dateModified":"2019-05-07T15:34:00-03:00","datePublished":"2019-05-07T15:34:00-03:00","description":"This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to check the first part where I introduced the subject and explained how to gather some information without digging into the hardware. If you haven’t downloaded the file for our target device you can it here.","@type":"BlogPosting","@context":"https://schema.org"}</script>
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/05/07/re-wireless-repeater-2"},"url":"http://localhost:4000/2019/05/07/re-wireless-repeater-2","headline":"Reverse engineering a wireless repeater - Part II","dateModified":"2019-05-07T15:34:00-03:00","datePublished":"2019-05-07T15:34:00-03:00","description":"This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to check the first part where I introduced the subject and explained how to gather some information without digging into the hardware. If you still haven’t downloaded the firmware of our target device you can get it here.","@type":"BlogPosting","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="patrickrbc" /></head>
 <body><header class="site-header">
@@ -52,21 +52,29 @@
 wireless repeater. Before reading this you might want to check the <a href="/2019/04/01/re-wireless-repeater">first
 part</a> where I introduced the subject and
 explained how to gather some information without digging into the hardware. If
-you haven’t downloaded the file for our target device you can it <a href="http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip">here</a>.</p>
+you still haven’t downloaded the firmware of our target device you can get it
+<a href="http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip">here</a>.</p>
 
-<p>This time we are going more hand-on on what you can do once you have the
-firmware file.</p>
+<p>Firstly, make sure you have extracted the zip file.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ unrar x fw_nplug_1_0_0_14.rar
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file fw_NPLUG_1_0_0_14.bin
+fw_NPLUG_1_0_0_14.bin: u-boot legacy uImage, Linux Kernel Image, Linux/MIPS, OS
+Kernel Image (lzma), 1731916 bytes, Wed Oct 12 17:28:28 2016, Load Address:
+0x80000000, Entry Point: 0x802CB000, Header CRC: 0xEC8AD091, Data CRC:
+0x3A3E5EAC
+</code></pre></div></div>
 
-[...]
+<p>Binwalk is a tool that analyses a binary searching for known file format
+signatures. Also, it can do a visual entropy analysis.</p>
 
-Extracting from fw_nplug_1_0_0_14.rar
+<p>TODO:</p>
 
-Extracting  fw_NPLUG_1_0_0_14.bin                                     OK
-Extracting  CHANGELOG NPLUG 1_0_0_14.pdf                              OK
-All OK
-$ binwalk -eM fw_NPLUG_1_0_0_14.bin
+<ul>
+  <li>binwalk entropy</li>
+  <li>binwalk extraction</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ binwalk -eM fw_NPLUG_1_0_0_14.bin
 $ cd fw_NPLUG_1_0_0_14.bin.extracted/_40.extracted/_2EB000.extracted/cpio-root/
 $ tree
 .
@@ -301,6 +309,11 @@ $ tree
 </code></pre></div></div>
 
 <h1 id="conclusion">Conclusion</h1>
+
+<p>In this post we learned how to extract the file system from a firmware. This
+taks can be much harder than what was demonstrated here. A firmware file can be
+constructed in many different ways which makes it difficult to analyze a bunch
+of them.</p>
 
 <h1 id="references">References</h1>
 

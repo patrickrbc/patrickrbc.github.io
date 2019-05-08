@@ -11,22 +11,30 @@ This is the second part of a series of posts about reverse engineering a
 wireless repeater. Before reading this you might want to check the [first
 part](/2019/04/01/re-wireless-repeater) where I introduced the subject and
 explained how to gather some information without digging into the hardware. If
-you haven't downloaded the file for our target device you can it [here](http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip).
+you still haven't downloaded the firmware of our target device you can get it
+[here](http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip).
 
-
-This time we are going more hand-on on what you can do once you have the
-firmware file.
+Firstly, make sure you have extracted the zip file.
 
 ```
-$ unrar x fw_nplug_1_0_0_14.rar
+$ file fw_NPLUG_1_0_0_14.bin
+fw_NPLUG_1_0_0_14.bin: u-boot legacy uImage, Linux Kernel Image, Linux/MIPS, OS
+Kernel Image (lzma), 1731916 bytes, Wed Oct 12 17:28:28 2016, Load Address:
+0x80000000, Entry Point: 0x802CB000, Header CRC: 0xEC8AD091, Data CRC:
+0x3A3E5EAC
+```
 
-[...]
+Binwalk is a tool that analyses a binary searching for known file format
+signatures. Also, it can do a visual entropy analysis.
 
-Extracting from fw_nplug_1_0_0_14.rar
+TODO:
 
-Extracting  fw_NPLUG_1_0_0_14.bin                                     OK
-Extracting  CHANGELOG NPLUG 1_0_0_14.pdf                              OK
-All OK
+- binwalk entropy
+- binwalk extraction
+
+
+
+```
 $ binwalk -eM fw_NPLUG_1_0_0_14.bin
 $ cd fw_NPLUG_1_0_0_14.bin.extracted/_40.extracted/_2EB000.extracted/cpio-root/
 $ tree
@@ -263,7 +271,11 @@ $ tree
 
 # Conclusion
 
-# References
+In this post we learned how to extract the file system from a firmware. This
+taks can be much harder than what was demonstrated here. A firmware file can be
+constructed in many different ways which makes it difficult to analyze a bunch
+of them.
 
+# References
 
 [zaddach-2013]: http://s3.eurecom.fr/docs/bh13us_zaddach.pdfk

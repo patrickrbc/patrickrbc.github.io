@@ -6,6 +6,10 @@
 $text-color: #DDDDDD;
 $background-color: #2F2F2F;
 
+pre {
+  max-height: 600px;
+}
+
 .night-mode:hover {
   text-decoration: none;
 }
