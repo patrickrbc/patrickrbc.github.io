@@ -523,3 +523,6 @@ body.dark {
     background-color: #2F2F2F;
     border: 1px solid #2F2F2F;
     overflow: hidden; }
+  body.dark .site-nav {
+    background-color: #2F2F2F;
+    border: 1px solid #828282; }
