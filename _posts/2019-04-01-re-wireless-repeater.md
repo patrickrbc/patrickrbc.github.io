@@ -3,7 +3,7 @@ layout: post
 title:  "Reverse engineering a wireless repeater - Part I"
 date:   2019-04-01 17:21:00 -0300
 comments: true
-categories: [reversing]
+categories:
 ---
 
 Do you have an old router left behind in your room? Ever wondered how it really
@@ -44,7 +44,7 @@ compared to modern systems.
 # Information gathering
 
 For our case study we are going to use an old wireless repeater named
-**NPLUG**, previously offered by the brazilian company **Intelbras**.
+**NPLUG**, previously offered by the Brazilian company **Intelbras**.
 Unfortunately, I couldn't find this product on their website anymore, but this
 is actually good for everyone. :)
 
@@ -94,15 +94,17 @@ same security holes between devices.
 
 The vendor website usually provides a download section where you can get
 manuals and the firmware file. If this is not the case you might get lucky
-searching for it in your search engine. When none of the above options is
-available you need to extract the firmware image from the hardware using one of
-the techniques that will be briefly descibed on the next part.
+searching for it in your search engine. For this series we are going to use the firmware of the NPLUG wireless repeater
+which can be acquired [here](http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip).
+
+When none of the above options is available you need to extract the firmware image from the hardware using one of the techniques that will be briefly described on the following posts.  
 
 # Conclusion
 
 This is all for now. I hope I had increased your appetite for what is coming
 next.  Make sure you subscribe to the RSS feed and follow me on Twitter so you
 can see when the Part 2 is released.
+
 
 # References
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-08T09:16:29-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle>Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</subtitle><author><name></name></author><entry><title type="html">Cryptopals: The basics</title><link href="http://localhost:4000/2019/04/06/cryptopals-the-basics" rel="alternate" type="text/html" title="Cryptopals: The basics" /><published>2019-04-06T16:42:00-03:00</published><updated>2019-04-06T16:42:00-03:00</updated><id>http://localhost:4000/2019/04/06/cryptopals-the-basics</id><content type="html" xml:base="http://localhost:4000/2019/04/06/cryptopals-the-basics">&lt;p&gt;If you have &lt;strong&gt;any&lt;/strong&gt; kind of interest in crypto you should probably check this
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-08T16:00:11-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle>Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</subtitle><author><name></name></author><entry><title type="html">Cryptopals: The basics</title><link href="http://localhost:4000/2019/04/06/cryptopals-the-basics" rel="alternate" type="text/html" title="Cryptopals: The basics" /><published>2019-04-06T16:42:00-03:00</published><updated>2019-04-06T16:42:00-03:00</updated><id>http://localhost:4000/2019/04/06/cryptopals-the-basics</id><content type="html" xml:base="http://localhost:4000/2019/04/06/cryptopals-the-basics">&lt;p&gt;If you have &lt;strong&gt;any&lt;/strong&gt; kind of interest in crypto you should probably check this
 out.  Recently, I started doing the &lt;strong&gt;Cryptopals&lt;/strong&gt;, which are a series of
 cryptography challenges created by the formerly Matasano Security team. They
 are a collection of 48 exercises divided in 8 sets. I have just finished the
@@ -392,7 +392,7 @@ solutions on Github and make my comments about them here. Stay tuned!&lt;/p&gt;
 &lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://cryptopals.com&quot;&gt;The cryptopals crypto challenges&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals, which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises divided in 8 sets. I have just finished the first set but I can guarantee you that it was already a lot of fun and learning.</summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part I</title><link href="http://localhost:4000/reversing/2019/04/01/re-wireless-repeater" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part I" /><published>2019-04-01T17:21:00-03:00</published><updated>2019-04-01T17:21:00-03:00</updated><id>http://localhost:4000/reversing/2019/04/01/re-wireless-repeater</id><content type="html" xml:base="http://localhost:4000/reversing/2019/04/01/re-wireless-repeater">&lt;p&gt;Do you have an old router left behind in your room? Ever wondered how it really
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals, which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises divided in 8 sets. I have just finished the first set but I can guarantee you that it was already a lot of fun and learning.</summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part I</title><link href="http://localhost:4000/2019/04/01/re-wireless-repeater" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part I" /><published>2019-04-01T17:21:00-03:00</published><updated>2019-04-01T17:21:00-03:00</updated><id>http://localhost:4000/2019/04/01/re-wireless-repeater</id><content type="html" xml:base="http://localhost:4000/2019/04/01/re-wireless-repeater">&lt;p&gt;Do you have an old router left behind in your room? Ever wondered how it really
 worked inside? Sit tight and get ready, because this is going to be a series of
 blog posts about reverse engineering a wireless repeater. The methodology here
 can be applied to other IoT devices.&lt;/p&gt;
@@ -430,7 +430,7 @@ compared to modern systems.&lt;/p&gt;
 &lt;h1 id=&quot;information-gathering&quot;&gt;Information gathering&lt;/h1&gt;
 
 &lt;p&gt;For our case study we are going to use an old wireless repeater named
-&lt;strong&gt;NPLUG&lt;/strong&gt;, previously offered by the brazilian company &lt;strong&gt;Intelbras&lt;/strong&gt;.
+&lt;strong&gt;NPLUG&lt;/strong&gt;, previously offered by the Brazilian company &lt;strong&gt;Intelbras&lt;/strong&gt;.
 Unfortunately, I couldn’t find this product on their website anymore, but this
 is actually good for everyone. :)&lt;/p&gt;
 
@@ -480,9 +480,10 @@ same security holes between devices.&lt;/p&gt;
 
 &lt;p&gt;The vendor website usually provides a download section where you can get
 manuals and the firmware file. If this is not the case you might get lucky
-searching for it in your search engine. When none of the above options is
-available you need to extract the firmware image from the hardware using one of
-the techniques that will be briefly descibed on the next part.&lt;/p&gt;
+searching for it in your search engine. For this series we are going to use the firmware of the NPLUG wireless repeater
+which can be acquired &lt;a href=&quot;http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;When none of the above options is available you need to extract the firmware image from the hardware using one of the techniques that will be briefly described on the following posts.&lt;/p&gt;
 
 &lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
 
