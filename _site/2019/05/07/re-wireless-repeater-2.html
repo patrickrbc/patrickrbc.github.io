@@ -55,7 +55,8 @@ explained how to gather some information without digging into the hardware. If
 you still haven’t downloaded the firmware of our target device you can get it
 <a href="http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip">here</a>.</p>
 
-<p>Firstly, make sure you have extracted the zip file.</p>
+<p>Firstly, make sure you have extracted the zip file. Using the <strong>file</strong> command we
+can verify that the firmware was compiled for Linux MIPS.</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file fw_NPLUG_1_0_0_14.bin
 fw_NPLUG_1_0_0_14.bin: u-boot legacy uImage, Linux Kernel Image, Linux/MIPS, OS
@@ -64,15 +65,48 @@ Kernel Image (lzma), 1731916 bytes, Wed Oct 12 17:28:28 2016, Load Address:
 0x3A3E5EAC
 </code></pre></div></div>
 
-<p>Binwalk is a tool that analyses a binary searching for known file format
-signatures. Also, it can do a visual entropy analysis.</p>
+<p>In order to extract meaningful stuff from this firmware file we need to find
+the offset of known file format signatures inside the binary. Once you know the
+offset you could extract the chunks using the Linux <strong>dd</strong> tool.</p>
 
-<p>TODO:</p>
+<p>However, it is not necessary to do that manually, instead, we will use a tool
+called <a href="https://github.com/ReFirmLabs/binwalk">Binwalk</a>. This tool, created by
+Craig Heffner, help a lot in the process of extracting file systems from
+firmware files.</p>
 
-<ul>
-  <li>binwalk entropy</li>
-  <li>binwalk extraction</li>
-</ul>
+<p>The <code class="highlighter-rouge">-e (--extract)</code> flag, will extract the files identified during a
+signature scan and the <code class="highlighter-rouge">-M (--matryoshka)</code> flag will perform this
+extraction recursively.</p>
+
+<p>There is algo a really useful option in Binwalk which allows a entropy analysis
+of the file. This can be helpful when Binwalk doesn’t work properly on the
+target file and you have to do a manul analysis.</p>
+
+<p>For example, taking a step back into what we did in the command before, if we
+extracted a chunk with Binwalk once, we would find a file named 40 (this number
+refers to its offset in hexadecimal). Using Binwalk with the <code class="highlighter-rouge">-e
+(--entropy)</code> flag in this file will pop the following line chart (generated
+with pyqtgraph).</p>
+
+<p><img src="/assets/nplug/40.png" alt="Entropy of file 40" />
+<br /></p>
+
+<p>The Y axis is the entropy and the X axis refers to the offset in that file.
+With this graph with can infer that there are some readable stuff in that file
+but there are some other regions with high entropy. A high entropy in a file
+probably means compressed or encrypted data. It could also be just garbage.</p>
+
+<p>Performing another extraction with Binwalk in the file <strong>40</strong> will output
+another file named <strong>2EB000</strong>. We can generate the entropy analysis line chart
+for the new file too.</p>
+
+<p><img src="/assets/nplug/2EB000.png" alt="Entropy of file 2EB000" />
+<br /></p>
+
+<p>This time we can see a lot of regions in the file with data that is probably
+readable. Not suprisingly, we have found the file system of the firmware. Of
+course, we could simply extract everything with just one command like the
+following demonstration:</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ binwalk -eM fw_NPLUG_1_0_0_14.bin
 $ cd fw_NPLUG_1_0_0_14.bin.extracted/_40.extracted/_2EB000.extracted/cpio-root/
@@ -307,7 +341,6 @@ $ tree
 
 41 directories, 185 files
 </code></pre></div></div>
-
 <h1 id="conclusion">Conclusion</h1>
 
 <p>In this post we learned how to extract the file system from a firmware. This
