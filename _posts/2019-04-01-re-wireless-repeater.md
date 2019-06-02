@@ -7,7 +7,7 @@ categories:
 ---
 
 Do you have an old router left behind in your room? Ever wondered how it really
-worked inside? Sit tight and get ready, because this is going to be a series of
+works inside? Sit tight and get ready, because this is going to be a series of
 blog posts about reverse engineering a wireless repeater. The methodology here
 can be applied to other IoT devices.
 
