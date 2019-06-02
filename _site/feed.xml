@@ -1,4 +1,369 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-06-01T21:22:43-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle>Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</subtitle><author><name></name></author><entry><title type="html">Cryptopals: The basics</title><link href="http://localhost:4000/2019/04/06/cryptopals-the-basics" rel="alternate" type="text/html" title="Cryptopals: The basics" /><published>2019-04-06T16:42:00-03:00</published><updated>2019-04-06T16:42:00-03:00</updated><id>http://localhost:4000/2019/04/06/cryptopals-the-basics</id><content type="html" xml:base="http://localhost:4000/2019/04/06/cryptopals-the-basics">&lt;p&gt;If you have &lt;strong&gt;any&lt;/strong&gt; kind of interest in crypto you should probably check this
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-06-01T21:25:09-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle>Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</subtitle><author><name></name></author><entry><title type="html">Reverse engineering a wireless repeater - Part II</title><link href="http://localhost:4000/2019/06/01/re-wireless-repeater-2" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part II" /><published>2019-06-01T21:25:00-03:00</published><updated>2019-06-01T21:25:00-03:00</updated><id>http://localhost:4000/2019/06/01/re-wireless-repeater-2</id><content type="html" xml:base="http://localhost:4000/2019/06/01/re-wireless-repeater-2">&lt;p&gt;This is the second part of a series of posts about reverse engineering a
+wireless repeater. Before reading this you might want to take a look at the
+&lt;a href=&quot;/2019/04/01/re-wireless-repeater&quot;&gt;first part&lt;/a&gt;, where I introduced the subject
+and explained how to gather some information without digging into the hardware.
+If you still haven’t downloaded the firmware of our target device you can get
+it &lt;a href=&quot;http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Firstly, make sure you have extracted the zip file. Using the &lt;strong&gt;file&lt;/strong&gt; command we
+can verify that the firmware was compiled for Linux MIPS.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ file fw_NPLUG_1_0_0_14.bin
+fw_NPLUG_1_0_0_14.bin: u-boot legacy uImage, Linux Kernel Image, Linux/MIPS, OS
+Kernel Image (lzma), 1731916 bytes, Wed Oct 12 17:28:28 2016, Load Address:
+0x80000000, Entry Point: 0x802CB000, Header CRC: 0xEC8AD091, Data CRC:
+0x3A3E5EAC
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There is not much you can do with this file as it is. In order to extract
+useful stuff from it we need to find the offset of known file format signatures
+inside the binary. Once you know the offset you could extract the chunks using
+the Linux &lt;strong&gt;dd&lt;/strong&gt; tool.&lt;/p&gt;
+
+&lt;p&gt;However, it is not necessary to do that manually, instead, we will use a tool
+called &lt;a href=&quot;https://github.com/ReFirmLabs/binwalk&quot;&gt;&lt;em&gt;Binwalk&lt;/em&gt;&lt;/a&gt;. This tool was created
+by &lt;a href=&quot;http://www.devttys0.com/&quot;&gt;Craig Heffner&lt;/a&gt; and it helps a lot in the process of extracting file systems
+from firmware files.&lt;/p&gt;
+
+&lt;h1 id=&quot;using-binwalk&quot;&gt;Using &lt;em&gt;Binwalk&lt;/em&gt;&lt;/h1&gt;
+
+&lt;p&gt;Running &lt;em&gt;Binwalk&lt;/em&gt; against the firmware without specifying any options would
+give us the following output:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             uImage header, header size: 64 bytes, header CRC: 0xEC8AD091, created: 2016-10-12 17:28:28, image size: 1731916 bytes, Data Address: 0x80000000, Entry Point: 0x802CB000, data CRC: 0x3A3E5EAC, OS: Linux, CPU: MIPS, image type: OS Kernel Image, compression type: lzma, image name: &quot;Linux Kernel Image&quot;
+64            0x40            LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 3829956 bytes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;That means the binary has a header and some compressed data starting at offset
+0x40. This assumption might be true or not, the tool is just trying to
+interpret the bytes in the file.
+Using the &lt;strong&gt;xxd&lt;/strong&gt; tool we can examine the first bytes from the binary which
+refer to the header:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ xxd -l 64 fw_NPLUG_1_0_0_14.bin
+00000000: 2705 1956 ec8a d091 57fe 72bc 001a 6d4c  '..V....W.r...mL
+00000010: 8000 0000 802c b000 3a3e 5eac 0505 0203  …..,..:&amp;gt;^.....
+00000020: 4c69 6e75 7820 4b65 726e 656c 2049 6d61  Linux Kernel Ima
+00000030: 6765 0000 0000 0000 0000 0000 0000 0000  ge..............
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Binwalk&lt;/em&gt; assumed the following chunk was related to some LZMA compressed data
+because of the signature &lt;code class=&quot;highlighter-rouge&quot;&gt;5d 00 00 00 02&lt;/code&gt;. This signature might
+&lt;a href=&quot;lzma-file-format&quot;&gt;vary&lt;/a&gt; depending
+on the compression level used, but apparently it always start with &lt;code class=&quot;highlighter-rouge&quot;&gt;5d 00 00&lt;/code&gt;.
+Here is the start of the compressed data:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[...]
+00000040: 5d00 0000 02c4 703a 0000 0000 0000 006f  ].....p:.......o
+00000050: fdff ffa3 b7ff 473e 4815 7239 6151 b892  …...G&amp;gt;H.r9aQ..
+00000060: 28e6 a386 07f9 eee4 1e82 d32f c53a 3c01  (........../.:&amp;lt;.
+00000070: 4bb1 7ec9 8a8a 4d2f a30d d97f a6e3 8c23  K.~...M/.......#
+00000080: 1153 e059 18c5 758a e277 f886 f31f 9269  .S.Y..u..w.....i
+00000090: 516e f9a2 84d4 b228 94f8 6af5 1bf9 141e  Qn.....(..j.....
+[...]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;-e (--extract)&lt;/code&gt; flag, will extract the files identified during a
+signature scan and the &lt;code class=&quot;highlighter-rouge&quot;&gt;-M (--matryoshka)&lt;/code&gt; flag will perform this
+extraction recursively. There is also another really useful option in &lt;em&gt;Binwalk&lt;/em&gt;
+which allows an entropy analysis of the file. This can be helpful when
+&lt;em&gt;Binwalk&lt;/em&gt;
+doesn’t work properly on the target file and you have to do a manual analysis.&lt;/p&gt;
+
+&lt;p&gt;For example, taking a step back, if we used &lt;em&gt;Binwalk&lt;/em&gt; extraction only once, we
+would find a file named &lt;strong&gt;40&lt;/strong&gt; (this number refers to its offset in hexadecimal).
+Using &lt;em&gt;Binwalk&lt;/em&gt; with the &lt;code class=&quot;highlighter-rouge&quot;&gt;-E (--entropy)&lt;/code&gt; flag in this file will pop the
+following line chart (generated with &lt;em&gt;pyqtgraph&lt;/em&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/nplug/40.png&quot; alt=&quot;Entropy of file 40&quot; /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;The Y axis is the entropy and the X axis refers to the offset in that file.
+With this graph we can infer that there are some readable stuff in that file
+but there are some other regions with high entropy. A high entropy in a file
+probably means compressed or encrypted data, but it could also be just garbage.&lt;/p&gt;
+
+&lt;p&gt;The signature scan for this file would give us the following output:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ binwalk 40
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+2658360       0x289038        Linux kernel version &quot;2.6.21 (root@linux-qxix)
+(gcc version 3.4.2) #1086 Thu Oct 13 01:28:23 CST 2016&quot;
+2659360       0x289420        CRC32 polynomial table, little endian
+2686144       0x28FCC0        SHA256 hash constants, little endian
+2728378       0x29A1BA        Unix path: /mru/rcvseq/sendseq/lns debug
+reorderto
+2736880       0x29C2F0        Unix path: /etc/Wireless/RT2860AP/RT2860AP.dat
+2737968       0x29C730        XML document, version: &quot;1.0&quot;
+2870768       0x2BCDF0        CRC32 polynomial table, little endian
+3059712       0x2EB000        LZMA compressed data, properties: 0x5D,
+dictionary size: 1048576 bytes, uncompressed size: 2943488 bytes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Performing another extraction with &lt;em&gt;Binwalk&lt;/em&gt; in the file &lt;strong&gt;40&lt;/strong&gt; will output
+another file named &lt;strong&gt;2EB000&lt;/strong&gt;. We can generate the entropy analysis line chart
+for the new file too.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/nplug/2EB000.png&quot; alt=&quot;Entropy of file 2EB000&quot; /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;This time we can see a lot of regions in the file with data that is probably
+readable. Not surprisingly, we have found the file system of the firmware. Of
+course, we could have simply extracted everything with just one command like
+the following demonstration:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ binwalk -eM fw_NPLUG_1_0_0_14.bin
+$ cd fw_NPLUG_1_0_0_14.bin.extracted/_40.extracted/_2EB000.extracted/cpio-root/
+$ tree
+.
+├── bin
+│   ├── ash -&amp;gt; busybox
+│   ├── ate
+│   ├── ated
+│   ├── busybox
+│   ├── cat -&amp;gt; busybox
+│   ├── chmod -&amp;gt; busybox
+│   ├── cp -&amp;gt; busybox
+│   ├── date -&amp;gt; busybox
+│   ├── default.cfg
+│   ├── dnrd
+│   ├── echo -&amp;gt; busybox
+│   ├── hostname -&amp;gt; busybox
+│   ├── httpd
+│   ├── inadyn
+│   ├── iptables
+│   ├── iwconfig
+│   ├── iwpriv
+│   ├── kill -&amp;gt; busybox
+│   ├── ls -&amp;gt; busybox
+│   ├── miniupnpd
+│   ├── mkdir -&amp;gt; busybox
+│   ├── mount -&amp;gt; busybox
+│   ├── msg
+│   ├── mtd_write
+│   ├── netctrl
+│   ├── nvram_clear -&amp;gt; ralink_init
+│   ├── nvram_commit -&amp;gt; ralink_init
+│   ├── nvram_get -&amp;gt; ralink_init
+│   ├── nvram_set -&amp;gt; ralink_init
+│   ├── nvram_show -&amp;gt; ralink_init
+│   ├── ping -&amp;gt; busybox
+│   ├── pppd
+│   ├── ps -&amp;gt; busybox
+│   ├── ralink_init
+│   ├── rm -&amp;gt; busybox
+│   ├── sh -&amp;gt; busybox
+│   ├── sntp
+│   ├── switch
+│   ├── tenda_chck_conn
+│   ├── tenda_deamon
+│   ├── tquser
+│   ├── udhcpc
+│   └── udhcpd
+├── dev
+│   └── pts
+├── etc
+│   └── fstab
+├── etc_ro
+│   ├── inittab
+│   ├── linuxigd
+│   ├── miniupnpd.conf
+│   ├── motd
+│   ├── ppp
+│   │   ├── 3g
+│   │   ├── ip-up
+│   │   ├── peers
+│   │   └── plugins
+│   │       └── rp-pppoe.so
+│   ├── rcS
+│   ├── usb
+│   ├── web
+│   │   ├── blank.htm
+│   │   ├── css
+│   │   ├── direct_reboot.asp
+│   │   ├── direct_reboot_wizard.asp
+│   │   ├── error.asp
+│   │   ├── firewall_clientfilter.asp
+│   │   ├── firewall_clientsetting.asp
+│   │   ├── firewall_mac.asp
+│   │   ├── firewall_macsetting.asp
+│   │   ├── firewall_packagefilter.asp
+│   │   ├── firewall_urlfilter.asp
+│   │   ├── firewall_urlsetting.asp
+│   │   ├── images
+│   │   │   ├── bg_button.gif
+│   │   │   ├── bg_button_over.gif
+│   │   │   ├── bt_disable2.png
+│   │   │   ├── bt_disable.png
+│   │   │   ├── bt_in_long.PNG
+│   │   │   ├── bt_long.PNG
+│   │   │   ├── bt_mouse-in2.png
+│   │   │   ├── bt_mouse-in.png
+│   │   │   ├── bt_nomal_login.gif
+│   │   │   ├── bt_normal2.png
+│   │   │   ├── bt_normal.png
+│   │   │   ├── bt_over_login.gif
+│   │   │   ├── bt_press2.png
+│   │   │   ├── bt_press.png
+│   │   │   ├── load_bg.png
+│   │   │   ├── loading.gif
+│   │   │   ├── login_bg.jpg
+│   │   │   ├── login_left.gif
+│   │   │   ├── login_right.gif
+│   │   │   ├── login_top.gif
+│   │   │   ├── menubg.gif
+│   │   │   ├── menu_bg.jpg
+│   │   │   ├── nav_normal.gif
+│   │   │   ├── ok.png
+│   │   │   ├── product.png
+│   │   │   ├── top.png
+│   │   │   └── wan.png
+│   │   ├── ipMacBind.asp
+│   │   ├── js
+│   │   │   ├── encode.js
+│   │   │   ├── menus_list.js
+│   │   │   └── system_tool.js
+│   │   ├── lan.asp
+│   │   ├── lan_dhcp_clients.asp
+│   │   ├── lan_dhcps.asp
+│   │   ├── login.asp
+│   │   ├── mac_clone.asp
+│   │   ├── main.htm
+│   │   ├── mode_select.asp
+│   │   ├── nat_dmz.asp
+│   │   ├── nat_virtualportseg.asp
+│   │   ├── net_tc.asp
+│   │   ├── password_error.asp
+│   │   ├── password_succeed.asp
+│   │   ├── public
+│   │   │   ├── base.css
+│   │   │   ├── common.css
+│   │   │   ├── gozila.js
+│   │   │   ├── j.js
+│   │   │   ├── menu.js
+│   │   │   ├── page_div.css
+│   │   │   ├── page_div.js
+│   │   │   ├── style.css
+│   │   │   └── table.js
+│   │   ├── reboot.asp
+│   │   ├── routing_static.asp
+│   │   ├── routing_table.asp
+│   │   ├── system_backup.asp
+│   │   ├── system_hostname.asp
+│   │   ├── system_log.asp
+│   │   ├── system_password.asp
+│   │   ├── system_reboot.asp
+│   │   ├── system_remote.asp
+│   │   ├── system_restore.asp
+│   │   ├── system_status.asp
+│   │   ├── system_upgrade
+│   │   ├── upgrading.asp
+│   │   ├── upnp_config.asp
+│   │   ├── wan_connected.asp
+│   │   ├── wan_dns.asp
+│   │   ├── wan_portParam.asp
+│   │   ├── wireless_basic.html
+│   │   ├── wireless_filter.html
+│   │   ├── wireless_scan.asp
+│   │   ├── wireless_security.html
+│   │   ├── wireless_state.html
+│   │   └── wizard.asp
+│   ├── Wireless
+│   │   ├── iNIC
+│   │   ├── RT2860AP
+│   │   │   ├── RT2860_default_novlan
+│   │   │   └── RT2860_default_vlan
+│   │   └── RT61AP
+│   ├── wlan
+│   │   └── RT5350_AP_1T1R_V1_0.bin
+│   └── xml
+├── home
+├── init -&amp;gt; bin/busybox
+├── lib
+│   ├── ipsec
+│   ├── ld-uClibc-0.9.28.so
+│   ├── ld-uClibc.so.0 -&amp;gt; ld-uClibc-0.9.28.so
+│   ├── libcrypt-0.9.28.so
+│   ├── libcrypt.so -&amp;gt; libcrypt-0.9.28.so
+│   ├── libcrypt.so.0 -&amp;gt; libcrypt-0.9.28.so
+│   ├── libc.so -&amp;gt; libuClibc-0.9.28.so
+│   ├── libc.so.0 -&amp;gt; libuClibc-0.9.28.so
+│   ├── libdl-0.9.28.so
+│   ├── libdl.so -&amp;gt; libdl-0.9.28.so
+│   ├── libdl.so.0 -&amp;gt; libdl-0.9.28.so
+│   ├── libiw.so.29
+│   ├── libnvram-0.9.28.so
+│   ├── libnvram.so -&amp;gt; libnvram-0.9.28.so
+│   ├── libnvram.so.0 -&amp;gt; libnvram-0.9.28.so
+│   ├── libpthread-0.9.28.so
+│   ├── libpthread.so -&amp;gt; libpthread-0.9.28.so
+│   ├── libpthread.so.0 -&amp;gt; libpthread-0.9.28.so
+│   ├── libresolv-0.9.28.so
+│   ├── libresolv.so -&amp;gt; libresolv-0.9.28.so
+│   ├── libresolv.so.0 -&amp;gt; libresolv-0.9.28.so
+│   ├── libtenda_common.so
+│   ├── libuClibc-0.9.28.so
+│   ├── libutil-0.9.28.so
+│   ├── libutil.so -&amp;gt; libutil-0.9.28.so
+│   ├── libutil.so.0 -&amp;gt; libutil-0.9.28.so
+│   └── modules
+│       ├── 2.6.21
+│       │   └── kernel
+│       │       └── net
+│       │           └── netfilter
+│       │               └── xt_webstr.ko
+│       ├── ipt_httpredirect.ko
+│       └── xt_turbo_qos.ko
+├── media
+├── mnt
+├── proc
+├── sbin
+│   ├── arp -&amp;gt; ../bin/busybox
+│   ├── halt -&amp;gt; ../bin/busybox
+│   ├── ifconfig -&amp;gt; ../bin/busybox
+│   ├── init -&amp;gt; ../bin/busybox
+│   ├── insmod -&amp;gt; ../bin/busybox
+│   ├── lsmod -&amp;gt; ../bin/busybox
+│   ├── poweroff -&amp;gt; ../bin/busybox
+│   ├── pppoe.sh
+│   ├── reboot -&amp;gt; ../bin/busybox
+│   ├── rmmod -&amp;gt; ../bin/busybox
+│   ├── route -&amp;gt; ../bin/busybox
+│   └── vconfig -&amp;gt; ../bin/busybox
+├── sys
+├── tmp
+├── usr
+│   ├── bin
+│   │   ├── expr -&amp;gt; ../../bin/busybox
+│   │   ├── killall -&amp;gt; ../../bin/busybox
+│   │   └── top -&amp;gt; ../../bin/busybox
+│   ├── codepages
+│   └── sbin
+│       ├── brctl -&amp;gt; ../../bin/busybox
+│       └── telnetd -&amp;gt; ../../bin/busybox
+└── var
+
+41 directories, 185 files
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;In this post we learned how to extract the file system from a firmware file.
+Sometimes this task can be much harder than what was demonstrated here. A
+firmware file can be constructed in many different ways which makes it
+difficult to analyze a bunch of them.&lt;/p&gt;
+
+&lt;p&gt;In the next part I am planning to go through the file system trying to find
+interesting stuff, stay tuned!&lt;/p&gt;
+
+&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/ReFirmLabs/binwalk&quot;&gt;Binwalk&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cscott/lzma-purejs/blob/master/FORMAT.md#lzma-file-format&quot;&gt;Notes on the LZMA format&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.devttys0.com/&quot;&gt;/dev/ttys0&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to take a look at the first part, where I introduced the subject and explained how to gather some information without digging into the hardware. If you still haven’t downloaded the firmware of our target device you can get it here.</summary></entry><entry><title type="html">Cryptopals: The basics</title><link href="http://localhost:4000/2019/04/06/cryptopals-the-basics" rel="alternate" type="text/html" title="Cryptopals: The basics" /><published>2019-04-06T16:42:00-03:00</published><updated>2019-04-06T16:42:00-03:00</updated><id>http://localhost:4000/2019/04/06/cryptopals-the-basics</id><content type="html" xml:base="http://localhost:4000/2019/04/06/cryptopals-the-basics">&lt;p&gt;If you have &lt;strong&gt;any&lt;/strong&gt; kind of interest in crypto you should probably check this
 out.  Recently, I started doing the &lt;strong&gt;Cryptopals&lt;/strong&gt;, which are a series of
 cryptography challenges created by the formerly Matasano Security team. They
 are a collection of 48 exercises divided in 8 sets. I have just finished the
