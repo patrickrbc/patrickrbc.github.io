@@ -2,18 +2,18 @@
 <html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
-<title>patrickrbc | Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</title>
-<meta name="generator" content="Jekyll v3.7.4" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>patrickrbc</title>
+<meta name="generator" content="Jekyll v3.9.1" />
 <meta property="og:title" content="patrickrbc" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!" />
-<meta property="og:description" content="Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!" />
 <link rel="canonical" href="http://localhost:4000/404" />
 <meta property="og:url" content="http://localhost:4000/404" />
 <meta property="og:site_name" content="patrickrbc" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="patrickrbc" />
 <script type="application/ld+json">
-{"headline":"patrickrbc","url":"http://localhost:4000/404","description":"Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!","@type":"WebPage","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/404","headline":"patrickrbc","@type":"WebPage","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="patrickrbc" /></head>
 <body><header class="site-header">
@@ -63,7 +63,11 @@
 
   <div class="wrapper">
 
-    <h2 class="footer-heading">patrickrbc</h2>
+    <div class="footer-col footer-col-1 post-meta">
+      GPG: 53CA 9711 9A55 0C86
+    </div>
+
+    <!--<h2 class="footer-heading">patrickrbc</h2>-->
 
     <div class="footer-col-wrapper">
       <div class="footer-col footer-col-1">
@@ -71,11 +75,57 @@
           <li class="p-name"></li></ul>
       </div>
 
-      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/patrickrbc"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">patrickrbc</span></a></li><li><a href="https://www.twitter.com/patrickrbc"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">patrickrbc</span></a></li></ul>
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li>
+    <a
+      rel="me"
+      href="https://t.me/patrickrbc"
+      target="_blank"
+      title="patrickrbc"
+      ><svg class="svg-icon grey">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#telegram"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span>
+    </a>
+  </li><li>
+    <a
+      href="https://github.com/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#github"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li><li>
+    <a
+      href="https://www.linkedin.com/in/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#linkedin"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li><li>
+    <a
+      href="https://www.twitter.com/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#twitter"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li></ul>
 </div>
 
       <div class="footer-col footer-col-3">
-        <p>Olá! My name is Patrick and I am a software and security engineer based in Recife, Brazil. Welcome to my blog!</p>
+        <p></p>
       </div>
     </div>
 
@@ -91,8 +141,26 @@
       gtag('config', 'UA-137241651-1');
     </script>
     <script>
-      document.querySelector('.night-mode').onclick = function (e) {
-        document.querySelector('body').classList.toggle('dark')
+      window.onload = function () {
+        setTheme(localStorage.getItem('theme'))
+      }
+
+      document.querySelector('.night-mode').onclick = function () {
+        let current = localStorage.getItem('theme')
+        setTheme(toggleName(current))
+      }
+
+      function toggleName (theme) {
+        return theme === 'dark' ? 'light': 'dark'
+      }
+
+     function setTheme (theme) {
+        theme = theme || 'light'
+
+        localStorage.setItem('theme', theme)
+
+        document.querySelector('body').classList.add(theme)
+        document.querySelector('body').classList.remove(toggleName(theme))
       }
     </script>
   </body>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Subdomain enumeration with wildcard records | patrickrbc</title>
+<meta name="generator" content="Jekyll v3.9.1" />
+<meta property="og:title" content="Subdomain enumeration with wildcard records" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="TL;DR" />
+<meta property="og:description" content="TL;DR" />
+<link rel="canonical" href="http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum" />
+<meta property="og:url" content="http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum" />
+<meta property="og:site_name" content="patrickrbc" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-31T13:49:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Subdomain enumeration with wildcard records" />
+<script type="application/ld+json">
+{"dateModified":"2021-07-31T13:49:00-03:00","datePublished":"2021-07-31T13:49:00-03:00","url":"http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum"},"description":"TL;DR","headline":"Subdomain enumeration with wildcard records","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="patrickrbc" /></head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">patrickrbc</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+
+          <a class="page-link night-mode" href="#">&#9790;</a><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Subdomain enumeration with wildcard records </h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-07-31T13:49:00-03:00" itemprop="datePublished">Jul 31, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p><strong>TL;DR</strong></p>
+
+<p>Enumerating subdomains with wildcard records is tricky but not impossible, here
+are some tips. Also, don’t trust wildcards as a security mechanism for hiding
+sensitive apps.</p>
+
+<h1 id="the-problem">The problem</h1>
+
+<p>If you did some subdomain brute-force enumeration in the wild you already
+bumped into a record that resolves for any type of prefix. This is called a
+wildcard record and it can be configured by inserting a record entry with a
+label “<strong>*</strong>”. This record will also resolve for other sublevels unless it is
+inhibited by another record entry.</p>
+
+<p>Many companies use wildcard records as part of their architecture. A well-known
+example is Slack which uses it for their workspaces. For example, today I asked
+my favorite DNS server to resolve the following records and got the same IP
+address:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shopify.enterprise.slack.com 18.231.0.250
+enterprise.slack.com 18.231.0.250
+big-name-non-existent.slack.com 18.231.0.250
+</code></pre></div></div>
+
+<p>In this case you might conclude that there is a wildcard record
+<strong>*.slack.com</strong> and maybe we should ignore this domain in your subdomain
+enumeration. However, you could end up missing something like
+<strong>status.slack.com</strong> which does not resolve to this address. Instead it has a
+CNAME pointing to another infrastructure that could be interesting to you.</p>
+
+<p>It is curious how often subdomain enumeration tools mess up or do not handle
+this kind of behaviour. Many times the wildcard records are just dropped
+without any further check. The problem is that you might lose some interesting
+apps by discarding them .</p>
+
+<p>With that in mind, adding a wildcard record can be a tempting strategy to hide
+your own services like a needle in the haystack. I can’t blame anyone for doing
+that, but just keep in mind that this is not going to save you for long.</p>
+
+<h1 id="finding-interesting-stuff">Finding interesting stuff</h1>
+
+<p>Thinking about how to make a better reconnaissance one could try to overcome
+this problem by treating enumeration in wildcard records differently. The
+response returned by the wildcard could be stored (sorted if it is multiple
+entries) and every subsequent DNS response would be compared with this one.
+Everytime we find a new response it would be saved in a map structure.</p>
+
+<p>This would make sure we have at least one subdomain that points to that new
+location that we found. However, <em>the world ain’t all sunshine and rainbows</em>
+and we could obviously have a different application sitting on a machine that
+will only show up when we set a specific Host header in the HTTP request.</p>
+
+<p>Therefore, this is just something you could use to have more places to look for
+security vulnerabilities. There are many other more edgy cases (for example
+when including CNAME) that can happen when trying to find assets using DNS. I
+hope I can dig into that more in future posts.</p>
+
+<p>Do you have any tips for finding apps on records with wildcard?</p>
+
+  </div>
+<a class="u-url" href="/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col footer-col-1 post-meta">
+      GPG: 53CA 9711 9A55 0C86
+    </div>
+
+    <!--<h2 class="footer-heading">patrickrbc</h2>-->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name"></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li>
+    <a
+      rel="me"
+      href="https://t.me/patrickrbc"
+      target="_blank"
+      title="patrickrbc"
+      ><svg class="svg-icon grey">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#telegram"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span>
+    </a>
+  </li><li>
+    <a
+      href="https://github.com/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#github"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li><li>
+    <a
+      href="https://www.linkedin.com/in/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#linkedin"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li><li>
+    <a
+      href="https://www.twitter.com/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#twitter"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+<script async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-137241651-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-137241651-1');
+    </script>
+    <script>
+      window.onload = function () {
+        setTheme(localStorage.getItem('theme'))
+      }
+
+      document.querySelector('.night-mode').onclick = function () {
+        let current = localStorage.getItem('theme')
+        setTheme(toggleName(current))
+      }
+
+      function toggleName (theme) {
+        return theme === 'dark' ? 'light': 'dark'
+      }
+
+     function setTheme (theme) {
+        theme = theme || 'light'
+
+        localStorage.setItem('theme', theme)
+
+        document.querySelector('body').classList.add(theme)
+        document.querySelector('body').classList.remove(toggleName(theme))
+      }
+    </script>
+  </body>
+
+</html>
