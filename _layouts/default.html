@@ -24,8 +24,26 @@
       gtag('config', 'UA-137241651-1');
     </script>
     <script>
-      document.querySelector('.night-mode').onclick = function (e) {
-        document.querySelector('body').classList.toggle('dark')
+      window.onload = function () {
+        setTheme(localStorage.getItem('theme'))
+      }
+
+      document.querySelector('.night-mode').onclick = function () {
+        let current = localStorage.getItem('theme')
+        setTheme(toggleName(current))
+      }
+
+      function toggleName (theme) {
+        return theme === 'dark' ? 'light': 'dark'
+      }
+
+     function setTheme (theme) {
+        theme = theme || 'light'
+
+        localStorage.setItem('theme', theme)
+
+        document.querySelector('body').classList.add(theme)
+        document.querySelector('body').classList.remove(toggleName(theme))
       }
     </script>
   </body>

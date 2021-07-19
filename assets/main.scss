@@ -3,8 +3,21 @@
 
 @import "minima";
 
-$text-color: #DDDDDD;
-$background-color: #2F2F2F;
+$text-color: #dddddd;
+$background-color: #2f2f2f;
+
+body {
+  background-color: #eeeee4;
+}
+
+a,
+a:visited {
+  color: #21130d;
+}
+
+a:hover {
+  color: #063970;
+}
 
 pre {
   max-height: 600px;
@@ -14,17 +27,27 @@ pre {
   text-decoration: none;
 }
 
+.footer-col {
+  float: left;
+  margin-bottom: 15px;
+  padding-left: 0;
+}
+
 body.dark {
   background-color: $background-color;
   color: $text-color;
   transition: 0.2s;
 
-  a, a:visited {
+  a,
+  a:visited {
     color: $text-color;
   }
 
-  .site-title, .site-title:visited, .site-nav .page-link, .footer-heading {
-    color: #FFC502;
+  .site-title,
+  .site-title:visited,
+  .site-nav .page-link,
+  .footer-heading {
+    color: #ffc502;
   }
 
   .post-list-heading {
@@ -35,14 +58,16 @@ body.dark {
     color: white;
   }
 
-  .highlight, .highlighter-rouge .highlight, pre, code {
+  .highlight,
+  .highlighter-rouge .highlight,
+  pre,
+  code {
     background-color: $background-color;
     border: 1px solid $background-color;
     overflow: hidden;
   }
 
   .site-nav {
-    background-color: #2F2F2F;
-    border: 1px solid #828282;
+    background-color: #2f2f2f;
   }
 }
