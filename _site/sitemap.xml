@@ -13,12 +13,16 @@
 <lastmod>2019-06-01T21:25:00-03:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum</loc>
+<loc>http://localhost:4000/2021/07/31/wildcard-subdomain-enum</loc>
 <lastmod>2021-07-31T13:49:00-03:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/2022/12/26/the-social-media-trap</loc>
 <lastmod>2022-12-26T21:32:00-03:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/2024/03/16/jest-slow-tests</loc>
+<lastmod>2024-03-16T13:42:00-03:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/404</loc>

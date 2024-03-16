@@ -514,6 +514,14 @@ a:visited {
 a:hover {
   color: #063970; }
 
+.post-content a,
+.post-content a:visited {
+  color: #063970;
+  font-weight: 500;
+  text-decoration: underline; }
+.post-content a:hover {
+  background-color: #ffc502; }
+
 pre {
   max-height: 600px; }
 

@@ -3,7 +3,6 @@ layout: post
 title: 'Subdomain enumeration with wildcard records '
 date: 2021-07-31 13:49:00 -0300
 comments: true
-categories: footprinting, subdomain, dns
 ---
 
 **TL;DR**

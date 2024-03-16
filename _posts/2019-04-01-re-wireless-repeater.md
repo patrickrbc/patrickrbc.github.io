@@ -3,7 +3,6 @@ layout: post
 title:  "Reverse engineering a wireless repeater - Part I"
 date:   2019-04-01 17:21:00 -0300
 comments: true
-categories:
 ---
 
 Do you have an old router left behind in your room? Ever wondered how it really

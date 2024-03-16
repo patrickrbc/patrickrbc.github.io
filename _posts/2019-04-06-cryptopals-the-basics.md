@@ -3,7 +3,6 @@ layout: post
 title:  "Cryptopals: The basics"
 date:   2019-04-06 16:42:00 -0300
 comments: true
-categories:
 ---
 
 If you have **any** kind of interest in crypto you should probably check this

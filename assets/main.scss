@@ -1,7 +1,7 @@
 ---
 ---
 
-@import "minima";
+@import 'minima';
 
 $text-color: #dddddd;
 $background-color: #2f2f2f;
@@ -17,6 +17,19 @@ a:visited {
 
 a:hover {
   color: #063970;
+}
+
+.post-content {
+  a,
+  a:visited {
+    color: #063970;
+    font-weight: 500;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    background-color: #ffc502;
+  }
 }
 
 pre {

@@ -1,4 +1,73 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-12-26T21:55:19-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle></subtitle><author><name></name></author><entry><title type="html">The social media trap</title><link href="http://localhost:4000/2022/12/26/the-social-media-trap" rel="alternate" type="text/html" title="The social media trap" /><published>2022-12-26T21:32:00-03:00</published><updated>2022-12-26T21:32:00-03:00</updated><id>http://localhost:4000/2022/12/26/the-social-media-trap</id><content type="html" xml:base="http://localhost:4000/2022/12/26/the-social-media-trap">&lt;p&gt;There’s no way one can avoid social media completely. We are social creatures.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-03-16T14:27:33-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle></subtitle><author><name></name></author><entry><title type="html">Migrating away from Jest and achieving over 90% reduction in running time</title><link href="http://localhost:4000/2024/03/16/jest-slow-tests" rel="alternate" type="text/html" title="Migrating away from Jest and achieving over 90% reduction in running time" /><published>2024-03-16T13:42:00-03:00</published><updated>2024-03-16T13:42:00-03:00</updated><id>http://localhost:4000/2024/03/16/jest-slow-tests</id><content type="html" xml:base="http://localhost:4000/2024/03/16/jest-slow-tests">&lt;p&gt;Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.&lt;/p&gt;
+
+&lt;p&gt;I’m not talking about UI testing here, so assume everything I’m saying is about server-side JS. If you’re happy with Jest, don’t switch! I’m not trying to convince anyone. I’m just sharing my experience because I bet there are people out there in the same situation as I was.&lt;/p&gt;
+
+&lt;p&gt;The decision to go with Jest wasn’t well thought out. At the time, I wasn’t heavily involved in software development, so I opted for the well-known, fully-fledged test framework. It seemed promising initially, with its great API.&lt;/p&gt;
+
+&lt;p&gt;However, after hundreds of tests, things started to break a lot. Memory leaks began to surface, the number of hacky flags multiplied, and visiting Jest’s issues tab became routine.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;Jests loads &lt;a href=&quot;https://github.com/jestjs/jest/issues/10550&quot;&gt;modules over and over again,&lt;/a&gt; leading to a memory leak. It is &lt;a href=&quot;https://chanind.github.io/javascript/2019/10/12/jest-tests-memory-leak.html&quot;&gt;designed in a way&lt;/a&gt; that makes those problems arise &lt;a href=&quot;https://github.com/jestjs/jest/issues/6814&quot;&gt;very likely&lt;/a&gt;, specially in backend projects that are getting big. I’m not going to try to describe the kind of issues here, but you can find them pretty easy &lt;a href=&quot;https://github.com/search?q=repo%3Ajestjs%2Fjest+memory&amp;amp;type=issues&quot;&gt;there&lt;/a&gt;. I’m just going to leave some leads for the poor users that are still fighting this battle.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;jest —logHeapUsage&lt;/strong&gt;
+&lt;br /&gt;
+As I’ve mentioned before, &lt;a href=&quot;https://github.com/jaredjj3/jest-memory-leak-demo&quot;&gt;memory&lt;/a&gt; &lt;a href=&quot;https://github.com/smolijar/jest-is-a-rude-needy-clown-and-eats-lot-of-memory?tab=readme-ov-file&quot;&gt;leaks&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/12142&quot;&gt;will&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7311&quot;&gt;be&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7874&quot;&gt;your&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/pull/8331&quot;&gt;best&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/11956&quot;&gt;friend&lt;/a&gt;, so you’d better watch your heap usage to spot sudden growth.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;jest —maxWorkers=50%&lt;/strong&gt;
+&lt;br /&gt;
+Some &lt;a href=&quot;https://ivantanev.com/make-jest-faster/&quot;&gt;benchmarks&lt;/a&gt; show that running with this configuration might make your tests run up to 20% faster. However, you have to test it in your project; some folks said it made things worse.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;jest —runInBand&lt;/strong&gt;
+&lt;br /&gt;
+This command runs all tests serially in the current process instead of creating a worker pool of child processes. They say it’s useful for debugging, but oddly enough, some people reported that it can actually improve performance.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;jest —changedSince&lt;/strong&gt;
+&lt;br /&gt;
+If you run a workflow for each PR update, your tests will run a LOT. So, if you have limited compute minutes or a constrained CI pipeline, this flag can significantly reduce the time your PR workflows take.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;jest-slow-test-reporter&lt;/strong&gt;
+&lt;br /&gt;
+You can use this reporter to view which tests are the slowest in your project and start tackling them first.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Exposing Node.js gargabe collector&lt;/strong&gt;
+&lt;br /&gt;
+In some cases, running Node with the flag &lt;strong&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--expose-gc&lt;/code&gt;&lt;/strong&gt; seems to handle memory leaks better.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;not-good-enough&quot;&gt;Not good enough&lt;/h3&gt;
+
+&lt;p&gt;Some of these strategies significantly reduced the running time during this period. However, the process of learning and implementing them came at the expense of delivery time, which is ultimately more critical.&lt;/p&gt;
+
+&lt;p&gt;The tests were so sluggish that I resorted to running them only on the module we were currently developing, then solely on the changed modules in the PR, and finally, all tests were run only when merging to the main branch. Unfortunately, this approach resulted in delays in identifying bugs.&lt;/p&gt;
+
+&lt;p&gt;The tests were so time-consuming that I found myself hesitating to write tests for certain features, worrying about the additional build process time they would cause. At this point, I realized it was time to make the switch.&lt;/p&gt;
+
+&lt;h2 id=&quot;switching-to-mocha&quot;&gt;Switching to Mocha&lt;/h2&gt;
+
+&lt;p&gt;I used Mocha a decade ago and it was awesome. So, I thought transitioning back to it would be smooth sailing. Over the past years, I’ve been seeing &lt;a href=&quot;https://github.com/jestjs/jest/issues/7832#issuecomment-1053545855&quot;&gt;people&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7963#issuecomment-802129978&quot;&gt;throwing&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7631#issuecomment-496335097&quot;&gt;out&lt;/a&gt; the idea of switching from Jest to Mocha, and always I found it &lt;a href=&quot;https://github.com/jestjs/jest/issues/9980#issuecomment-1808310819&quot;&gt;funny&lt;/a&gt;. I remember there were a lot of guides and people talking about migrating from Mocha to Jest. Like me, most of people would assume the newer tool would have a better or at least similar performance.&lt;/p&gt;
+
+&lt;p&gt;The migration was much easier, than expected. A couple of replace cases and and less than an hour refactoring some code. The tricker part was the mock engine, which isn’t included in Mocha.&lt;/p&gt;
+
+&lt;p&gt;I could have used &lt;a href=&quot;https://sinonjs.org/&quot;&gt;Sinon.js&lt;/a&gt; for that, but I really like the idea of one day not relying on any testing libraries. I even considered using only the new Node.js built-in test runner, but it’s not quite there yet for me. So, I decided to stick with just the built-in &lt;a href=&quot;https://nodejs.org/api/test.html#class-mocktracker&quot;&gt;MockTracker&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Trying things out was mind-blowing. Single tests that were taking 3 seconds with Jest would run in less than 200ms with Mocha. It shouldn’t be a surprise – what I was running shouldn’t take so long, but I had gotten used to that slowness. In the end, our test running time reduced from more than 12 minutes to less than 40 seconds.&lt;/p&gt;
+
+&lt;p&gt;The speed of Mocha helped us uncover hidden bugs that would occasionally fail tests because they only occurred under very specific conditions – conditions that were unlikely to be met in Jest due to its slower performance.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;I still use Jest on some smaller repositories that I maintain, and I’m not mad enough to migrate them until they become a problem. However, for future projects, I’ll definitely opt for Mocha or the Node.js test runner.&lt;/p&gt;
+
+&lt;p&gt;The thing is, even if there’s a way to optimize Jest and run thousands of tests in a reasonable time, there’s something wrong when simply switching the testing framework results in significantly faster performance. Do you agree? Do you have any similar experiences? I’d love to hear about them.&lt;/p&gt;</content><author><name></name></author><summary type="html">Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.</summary></entry><entry><title type="html">The social media trap</title><link href="http://localhost:4000/2022/12/26/the-social-media-trap" rel="alternate" type="text/html" title="The social media trap" /><published>2022-12-26T21:32:00-03:00</published><updated>2022-12-26T21:32:00-03:00</updated><id>http://localhost:4000/2022/12/26/the-social-media-trap</id><content type="html" xml:base="http://localhost:4000/2022/12/26/the-social-media-trap">&lt;p&gt;There’s no way one can avoid social media completely. We are social creatures.
 Even if you close all your accounts and remove all the apps, you would still be
 influenced by other people’s behaviors and opinions, and those probably got a
 high load of influence from social media and so on.&lt;/p&gt;
@@ -18,7 +87,7 @@ feedback you could receive if you saw something good enough.&lt;/p&gt;
 
 &lt;p&gt;If you can’t escape from it, maybe it’s a good idea to spend some time
 implementing filters to avoid the consumption of unhealthy content. You need to
-feed yourself, just not with junky food.&lt;/p&gt;</content><author><name></name></author><summary type="html">There’s no way one can avoid social media completely. We are social creatures. Even if you close all your accounts and remove all the apps, you would still be influenced by other people’s behaviors and opinions, and those probably got a high load of influence from social media and so on.</summary></entry><entry><title type="html">Subdomain enumeration with wildcard records</title><link href="http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum" rel="alternate" type="text/html" title="Subdomain enumeration with wildcard records" /><published>2021-07-31T13:49:00-03:00</published><updated>2021-07-31T13:49:00-03:00</updated><id>http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum</id><content type="html" xml:base="http://localhost:4000/footprinting,/subdomain,/dns/2021/07/31/wildcard-subdomain-enum">&lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt;&lt;/p&gt;
+feed yourself, just not with junky food.&lt;/p&gt;</content><author><name></name></author><summary type="html">There’s no way one can avoid social media completely. We are social creatures. Even if you close all your accounts and remove all the apps, you would still be influenced by other people’s behaviors and opinions, and those probably got a high load of influence from social media and so on.</summary></entry><entry><title type="html">Subdomain enumeration with wildcard records</title><link href="http://localhost:4000/2021/07/31/wildcard-subdomain-enum" rel="alternate" type="text/html" title="Subdomain enumeration with wildcard records" /><published>2021-07-31T13:49:00-03:00</published><updated>2021-07-31T13:49:00-03:00</updated><id>http://localhost:4000/2021/07/31/wildcard-subdomain-enum</id><content type="html" xml:base="http://localhost:4000/2021/07/31/wildcard-subdomain-enum">&lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Enumerating subdomains with wildcard records is tricky but not impossible, here
 are some tips. Also, don’t trust wildcards as a security mechanism for hiding
@@ -75,7 +144,7 @@ security vulnerabilities. There are many other more edgy cases (for example
 when including CNAME) that can happen when trying to find assets using DNS. I
 hope I can dig into that more in future posts.&lt;/p&gt;
 
-&lt;p&gt;Do you have any tips for finding apps on records with wildcard?&lt;/p&gt;</content><author><name></name></author><category term="footprinting," /><category term="subdomain," /><category term="dns" /><summary type="html">TL;DR</summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part II</title><link href="http://localhost:4000/2019/06/01/re-wireless-repeater-2" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part II" /><published>2019-06-01T21:25:00-03:00</published><updated>2019-06-01T21:25:00-03:00</updated><id>http://localhost:4000/2019/06/01/re-wireless-repeater-2</id><content type="html" xml:base="http://localhost:4000/2019/06/01/re-wireless-repeater-2">&lt;p&gt;This is the second part of a series of posts about reverse engineering a
+&lt;p&gt;Do you have any tips for finding apps on records with wildcard?&lt;/p&gt;</content><author><name></name></author><summary type="html">TL;DR</summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part II</title><link href="http://localhost:4000/2019/06/01/re-wireless-repeater-2" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part II" /><published>2019-06-01T21:25:00-03:00</published><updated>2019-06-01T21:25:00-03:00</updated><id>http://localhost:4000/2019/06/01/re-wireless-repeater-2</id><content type="html" xml:base="http://localhost:4000/2019/06/01/re-wireless-repeater-2">&lt;p&gt;This is the second part of a series of posts about reverse engineering a
 wireless repeater. Before reading this you might want to take a look at the
 &lt;a href=&quot;/2019/04/01/re-wireless-repeater&quot;&gt;first part&lt;/a&gt;, where I introduced the subject
 and explained how to gather some information without digging into the hardware.

@@ -3,7 +3,6 @@ layout: post
 title: The social media trap
 date: 2022-12-26 21:32:00 -0300
 comments: true
-categories:
 ---
 
 There's no way one can avoid social media completely. We are social creatures.
