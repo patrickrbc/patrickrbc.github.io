@@ -5,7 +5,7 @@ permalink: /about/
 ---
 
 I am a software and security engineer based in
-[Recife](https://goo.gl/maps/zydFuxsk54fsfzDk7){:target="\_blank"} with 8+
+[Recife](https://goo.gl/maps/zydFuxsk54fsfzDk7){:target="\_blank"} with 10+
 years of experience. Since 2020, I'm also building
 [Unxpose](https://www.unxpose.com/){:target="\_blank"} a solution that
 simplifies cybersecurity for busy companies.
