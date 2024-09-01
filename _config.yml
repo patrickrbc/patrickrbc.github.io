@@ -23,9 +23,8 @@ url: 'https://patrickrbc.com' # the base hostname & protocol for your site, e.g.
 social:
   github: patrickrbc
   linkedin: patrickrbc
-  telegram: patrickrbc
-  twitter: patrickrbc
   mastodon: patrickrbc
+  rss: feed.xml
 
 # Build settings
 markdown: kramdown
