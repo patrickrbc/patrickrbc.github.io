@@ -37,6 +37,8 @@ disqus:
 
 permalink: /:categories/:year/:month/:day/:title
 
+include: [_util]
+
 plugins:
   - jekyll-feed
   - jekyll-sitemap

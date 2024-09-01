@@ -1,307 +1,307 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-03-16T14:27:33-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle></subtitle><author><name></name></author><entry><title type="html">Migrating away from Jest and achieving over 90% reduction in running time</title><link href="http://localhost:4000/2024/03/16/jest-slow-tests" rel="alternate" type="text/html" title="Migrating away from Jest and achieving over 90% reduction in running time" /><published>2024-03-16T13:42:00-03:00</published><updated>2024-03-16T13:42:00-03:00</updated><id>http://localhost:4000/2024/03/16/jest-slow-tests</id><content type="html" xml:base="http://localhost:4000/2024/03/16/jest-slow-tests">&lt;p&gt;Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-09-01T16:18:52-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle></subtitle><author><name></name></author><entry><title type="html">Migrating away from Jest and achieving over 90% reduction in running time</title><link href="http://localhost:4000/2024/03/16/jest-slow-tests" rel="alternate" type="text/html" title="Migrating away from Jest and achieving over 90% reduction in running time" /><published>2024-03-16T13:42:00-03:00</published><updated>2024-03-16T13:42:00-03:00</updated><id>http://localhost:4000/2024/03/16/jest-slow-tests</id><content type="html" xml:base="http://localhost:4000/2024/03/16/jest-slow-tests"><![CDATA[<p>Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.</p>
 
-&lt;p&gt;I’m not talking about UI testing here, so assume everything I’m saying is about server-side JS. If you’re happy with Jest, don’t switch! I’m not trying to convince anyone. I’m just sharing my experience because I bet there are people out there in the same situation as I was.&lt;/p&gt;
+<p>I’m not talking about UI testing here, so assume everything I’m saying is about server-side JS. If you’re happy with Jest, don’t switch! I’m not trying to convince anyone. I’m just sharing my experience because I bet there are people out there in the same situation as I was.</p>
 
-&lt;p&gt;The decision to go with Jest wasn’t well thought out. At the time, I wasn’t heavily involved in software development, so I opted for the well-known, fully-fledged test framework. It seemed promising initially, with its great API.&lt;/p&gt;
+<p>The decision to go with Jest wasn’t well thought out. At the time, I wasn’t heavily involved in software development, so I opted for the well-known, fully-fledged test framework. It seemed promising initially, with its great API.</p>
 
-&lt;p&gt;However, after hundreds of tests, things started to break a lot. Memory leaks began to surface, the number of hacky flags multiplied, and visiting Jest’s issues tab became routine.&lt;/p&gt;
+<p>However, after hundreds of tests, things started to break a lot. Memory leaks began to surface, the number of hacky flags multiplied, and visiting Jest’s issues tab became routine.</p>
 
-&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+<h2 id="the-problem">The problem</h2>
 
-&lt;p&gt;Jests loads &lt;a href=&quot;https://github.com/jestjs/jest/issues/10550&quot;&gt;modules over and over again,&lt;/a&gt; leading to a memory leak. It is &lt;a href=&quot;https://chanind.github.io/javascript/2019/10/12/jest-tests-memory-leak.html&quot;&gt;designed in a way&lt;/a&gt; that makes those problems arise &lt;a href=&quot;https://github.com/jestjs/jest/issues/6814&quot;&gt;very likely&lt;/a&gt;, specially in backend projects that are getting big. I’m not going to try to describe the kind of issues here, but you can find them pretty easy &lt;a href=&quot;https://github.com/search?q=repo%3Ajestjs%2Fjest+memory&amp;amp;type=issues&quot;&gt;there&lt;/a&gt;. I’m just going to leave some leads for the poor users that are still fighting this battle.&lt;/p&gt;
+<p>Jests loads <a href="https://github.com/jestjs/jest/issues/10550">modules over and over again,</a> leading to a memory leak. It is <a href="https://chanind.github.io/javascript/2019/10/12/jest-tests-memory-leak.html">designed in a way</a> that makes those problems arise <a href="https://github.com/jestjs/jest/issues/6814">very likely</a>, specially in backend projects that are getting big. I’m not going to try to describe the kind of issues here, but you can find them pretty easy <a href="https://github.com/search?q=repo%3Ajestjs%2Fjest+memory&amp;type=issues">there</a>. I’m just going to leave some leads for the poor users that are still fighting this battle.</p>
 
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;jest —logHeapUsage&lt;/strong&gt;
-&lt;br /&gt;
-As I’ve mentioned before, &lt;a href=&quot;https://github.com/jaredjj3/jest-memory-leak-demo&quot;&gt;memory&lt;/a&gt; &lt;a href=&quot;https://github.com/smolijar/jest-is-a-rude-needy-clown-and-eats-lot-of-memory?tab=readme-ov-file&quot;&gt;leaks&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/12142&quot;&gt;will&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7311&quot;&gt;be&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7874&quot;&gt;your&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/pull/8331&quot;&gt;best&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/11956&quot;&gt;friend&lt;/a&gt;, so you’d better watch your heap usage to spot sudden growth.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;jest —maxWorkers=50%&lt;/strong&gt;
-&lt;br /&gt;
-Some &lt;a href=&quot;https://ivantanev.com/make-jest-faster/&quot;&gt;benchmarks&lt;/a&gt; show that running with this configuration might make your tests run up to 20% faster. However, you have to test it in your project; some folks said it made things worse.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;jest —runInBand&lt;/strong&gt;
-&lt;br /&gt;
-This command runs all tests serially in the current process instead of creating a worker pool of child processes. They say it’s useful for debugging, but oddly enough, some people reported that it can actually improve performance.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;jest —changedSince&lt;/strong&gt;
-&lt;br /&gt;
-If you run a workflow for each PR update, your tests will run a LOT. So, if you have limited compute minutes or a constrained CI pipeline, this flag can significantly reduce the time your PR workflows take.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;jest-slow-test-reporter&lt;/strong&gt;
-&lt;br /&gt;
-You can use this reporter to view which tests are the slowest in your project and start tackling them first.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;Exposing Node.js gargabe collector&lt;/strong&gt;
-&lt;br /&gt;
-In some cases, running Node with the flag &lt;strong&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--expose-gc&lt;/code&gt;&lt;/strong&gt; seems to handle memory leaks better.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
+<ol>
+  <li>
+    <p><strong>jest —logHeapUsage</strong>
+<br />
+As I’ve mentioned before, <a href="https://github.com/jaredjj3/jest-memory-leak-demo">memory</a> <a href="https://github.com/smolijar/jest-is-a-rude-needy-clown-and-eats-lot-of-memory?tab=readme-ov-file">leaks</a> <a href="https://github.com/jestjs/jest/issues/12142">will</a> <a href="https://github.com/jestjs/jest/issues/7311">be</a> <a href="https://github.com/jestjs/jest/issues/7874">your</a> <a href="https://github.com/jestjs/jest/pull/8331">best</a> <a href="https://github.com/jestjs/jest/issues/11956">friend</a>, so you’d better watch your heap usage to spot sudden growth.</p>
+  </li>
+  <li>
+    <p><strong>jest —maxWorkers=50%</strong>
+<br />
+Some <a href="https://ivantanev.com/make-jest-faster/">benchmarks</a> show that running with this configuration might make your tests run up to 20% faster. However, you have to test it in your project; some folks said it made things worse.</p>
+  </li>
+  <li>
+    <p><strong>jest —runInBand</strong>
+<br />
+This command runs all tests serially in the current process instead of creating a worker pool of child processes. They say it’s useful for debugging, but oddly enough, some people reported that it can actually improve performance.</p>
+  </li>
+  <li>
+    <p><strong>jest —changedSince</strong>
+<br />
+If you run a workflow for each PR update, your tests will run a LOT. So, if you have limited compute minutes or a constrained CI pipeline, this flag can significantly reduce the time your PR workflows take.</p>
+  </li>
+  <li>
+    <p><strong>jest-slow-test-reporter</strong>
+<br />
+You can use this reporter to view which tests are the slowest in your project and start tackling them first.</p>
+  </li>
+  <li>
+    <p><strong>Exposing Node.js gargabe collector</strong>
+<br />
+In some cases, running Node with the flag <strong><code class="language-plaintext highlighter-rouge">--expose-gc</code></strong> seems to handle memory leaks better.</p>
+  </li>
+</ol>
 
-&lt;h3 id=&quot;not-good-enough&quot;&gt;Not good enough&lt;/h3&gt;
+<h3 id="not-good-enough">Not good enough</h3>
 
-&lt;p&gt;Some of these strategies significantly reduced the running time during this period. However, the process of learning and implementing them came at the expense of delivery time, which is ultimately more critical.&lt;/p&gt;
+<p>Some of these strategies significantly reduced the running time during this period. However, the process of learning and implementing them came at the expense of delivery time, which is ultimately more critical.</p>
 
-&lt;p&gt;The tests were so sluggish that I resorted to running them only on the module we were currently developing, then solely on the changed modules in the PR, and finally, all tests were run only when merging to the main branch. Unfortunately, this approach resulted in delays in identifying bugs.&lt;/p&gt;
+<p>The tests were so sluggish that I resorted to running them only on the module we were currently developing, then solely on the changed modules in the PR, and finally, all tests were run only when merging to the main branch. Unfortunately, this approach resulted in delays in identifying bugs.</p>
 
-&lt;p&gt;The tests were so time-consuming that I found myself hesitating to write tests for certain features, worrying about the additional build process time they would cause. At this point, I realized it was time to make the switch.&lt;/p&gt;
+<p>The tests were so time-consuming that I found myself hesitating to write tests for certain features, worrying about the additional build process time they would cause. At this point, I realized it was time to make the switch.</p>
 
-&lt;h2 id=&quot;switching-to-mocha&quot;&gt;Switching to Mocha&lt;/h2&gt;
+<h2 id="switching-to-mocha">Switching to Mocha</h2>
 
-&lt;p&gt;I used Mocha a decade ago and it was awesome. So, I thought transitioning back to it would be smooth sailing. Over the past years, I’ve been seeing &lt;a href=&quot;https://github.com/jestjs/jest/issues/7832#issuecomment-1053545855&quot;&gt;people&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7963#issuecomment-802129978&quot;&gt;throwing&lt;/a&gt; &lt;a href=&quot;https://github.com/jestjs/jest/issues/7631#issuecomment-496335097&quot;&gt;out&lt;/a&gt; the idea of switching from Jest to Mocha, and always I found it &lt;a href=&quot;https://github.com/jestjs/jest/issues/9980#issuecomment-1808310819&quot;&gt;funny&lt;/a&gt;. I remember there were a lot of guides and people talking about migrating from Mocha to Jest. Like me, most of people would assume the newer tool would have a better or at least similar performance.&lt;/p&gt;
+<p>I used Mocha a decade ago and it was awesome. So, I thought transitioning back to it would be smooth sailing. Over the past years, I’ve been seeing <a href="https://github.com/jestjs/jest/issues/7832#issuecomment-1053545855">people</a> <a href="https://github.com/jestjs/jest/issues/7963#issuecomment-802129978">throwing</a> <a href="https://github.com/jestjs/jest/issues/7631#issuecomment-496335097">out</a> the idea of switching from Jest to Mocha, and always I found it <a href="https://github.com/jestjs/jest/issues/9980#issuecomment-1808310819">funny</a>. I remember there were a lot of guides and people talking about migrating from Mocha to Jest. Like me, most of people would assume the newer tool would have a better or at least similar performance.</p>
 
-&lt;p&gt;The migration was much easier, than expected. A couple of replace cases and and less than an hour refactoring some code. The tricker part was the mock engine, which isn’t included in Mocha.&lt;/p&gt;
+<p>The migration was much easier, than expected. A couple of replace cases and and less than an hour refactoring some code. The tricker part was the mock engine, which isn’t included in Mocha.</p>
 
-&lt;p&gt;I could have used &lt;a href=&quot;https://sinonjs.org/&quot;&gt;Sinon.js&lt;/a&gt; for that, but I really like the idea of one day not relying on any testing libraries. I even considered using only the new Node.js built-in test runner, but it’s not quite there yet for me. So, I decided to stick with just the built-in &lt;a href=&quot;https://nodejs.org/api/test.html#class-mocktracker&quot;&gt;MockTracker&lt;/a&gt;.&lt;/p&gt;
+<p>I could have used <a href="https://sinonjs.org/">Sinon.js</a> for that, but I really like the idea of one day not relying on any testing libraries. I even considered using only the new Node.js built-in test runner, but it’s not quite there yet for me. So, I decided to stick with just the built-in <a href="https://nodejs.org/api/test.html#class-mocktracker">MockTracker</a>.</p>
 
-&lt;p&gt;Trying things out was mind-blowing. Single tests that were taking 3 seconds with Jest would run in less than 200ms with Mocha. It shouldn’t be a surprise – what I was running shouldn’t take so long, but I had gotten used to that slowness. In the end, our test running time reduced from more than 12 minutes to less than 40 seconds.&lt;/p&gt;
+<p>Trying things out was mind-blowing. Single tests that were taking 3 seconds with Jest would run in less than 200ms with Mocha. It shouldn’t be a surprise – what I was running shouldn’t take so long, but I had gotten used to that slowness. In the end, our test running time reduced from more than 12 minutes to less than 40 seconds.</p>
 
-&lt;p&gt;The speed of Mocha helped us uncover hidden bugs that would occasionally fail tests because they only occurred under very specific conditions – conditions that were unlikely to be met in Jest due to its slower performance.&lt;/p&gt;
+<p>The speed of Mocha helped us uncover hidden bugs that would occasionally fail tests because they only occurred under very specific conditions – conditions that were unlikely to be met in Jest due to its slower performance.</p>
 
-&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+<h2 id="conclusion">Conclusion</h2>
 
-&lt;p&gt;I still use Jest on some smaller repositories that I maintain, and I’m not mad enough to migrate them until they become a problem. However, for future projects, I’ll definitely opt for Mocha or the Node.js test runner.&lt;/p&gt;
+<p>I still use Jest on some smaller repositories that I maintain, and I’m not mad enough to migrate them until they become a problem. However, for future projects, I’ll definitely opt for Mocha or the Node.js test runner.</p>
 
-&lt;p&gt;The thing is, even if there’s a way to optimize Jest and run thousands of tests in a reasonable time, there’s something wrong when simply switching the testing framework results in significantly faster performance. Do you agree? Do you have any similar experiences? I’d love to hear about them.&lt;/p&gt;</content><author><name></name></author><summary type="html">Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.</summary></entry><entry><title type="html">The social media trap</title><link href="http://localhost:4000/2022/12/26/the-social-media-trap" rel="alternate" type="text/html" title="The social media trap" /><published>2022-12-26T21:32:00-03:00</published><updated>2022-12-26T21:32:00-03:00</updated><id>http://localhost:4000/2022/12/26/the-social-media-trap</id><content type="html" xml:base="http://localhost:4000/2022/12/26/the-social-media-trap">&lt;p&gt;There’s no way one can avoid social media completely. We are social creatures.
+<p>The thing is, even if there’s a way to optimize Jest and run thousands of tests in a reasonable time, there’s something wrong when simply switching the testing framework results in significantly faster performance. Do you agree? Do you have any similar experiences? I’d love to hear about them.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.]]></summary></entry><entry><title type="html">The social media trap</title><link href="http://localhost:4000/2022/12/26/the-social-media-trap" rel="alternate" type="text/html" title="The social media trap" /><published>2022-12-26T21:32:00-03:00</published><updated>2022-12-26T21:32:00-03:00</updated><id>http://localhost:4000/2022/12/26/the-social-media-trap</id><content type="html" xml:base="http://localhost:4000/2022/12/26/the-social-media-trap"><![CDATA[<p>There’s no way one can avoid social media completely. We are social creatures.
 Even if you close all your accounts and remove all the apps, you would still be
 influenced by other people’s behaviors and opinions, and those probably got a
-high load of influence from social media and so on.&lt;/p&gt;
+high load of influence from social media and so on.</p>
 
-&lt;p&gt;You can indeed make money producing content online. It is also true that social
+<p>You can indeed make money producing content online. It is also true that social
 media platforms can boost your reach. However, the majority of the population is
 just consuming and creating poor content that will never lead to a financial
-reward.&lt;/p&gt;
+reward.</p>
 
-&lt;p&gt;I would consider myself in the above situation. I’m not in a fair trade with
+<p>I would consider myself in the above situation. I’m not in a fair trade with
 social media. Not that I ever felt I could be. But the fear of missing out makes
-me play the game without even thinking about it.&lt;/p&gt;
+me play the game without even thinking about it.</p>
 
-&lt;p&gt;Most of the value generated from our actions is turned into revenue for the big
+<p>Most of the value generated from our actions is turned into revenue for the big
 techs. In exchange for that, you will be gifted with a subtle dependency on the
-feedback you could receive if you saw something good enough.&lt;/p&gt;
+feedback you could receive if you saw something good enough.</p>
 
-&lt;p&gt;If you can’t escape from it, maybe it’s a good idea to spend some time
+<p>If you can’t escape from it, maybe it’s a good idea to spend some time
 implementing filters to avoid the consumption of unhealthy content. You need to
-feed yourself, just not with junky food.&lt;/p&gt;</content><author><name></name></author><summary type="html">There’s no way one can avoid social media completely. We are social creatures. Even if you close all your accounts and remove all the apps, you would still be influenced by other people’s behaviors and opinions, and those probably got a high load of influence from social media and so on.</summary></entry><entry><title type="html">Subdomain enumeration with wildcard records</title><link href="http://localhost:4000/2021/07/31/wildcard-subdomain-enum" rel="alternate" type="text/html" title="Subdomain enumeration with wildcard records" /><published>2021-07-31T13:49:00-03:00</published><updated>2021-07-31T13:49:00-03:00</updated><id>http://localhost:4000/2021/07/31/wildcard-subdomain-enum</id><content type="html" xml:base="http://localhost:4000/2021/07/31/wildcard-subdomain-enum">&lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt;&lt;/p&gt;
+feed yourself, just not with junky food.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[There’s no way one can avoid social media completely. We are social creatures. Even if you close all your accounts and remove all the apps, you would still be influenced by other people’s behaviors and opinions, and those probably got a high load of influence from social media and so on.]]></summary></entry><entry><title type="html">Subdomain enumeration with wildcard records</title><link href="http://localhost:4000/2021/07/31/wildcard-subdomain-enum" rel="alternate" type="text/html" title="Subdomain enumeration with wildcard records" /><published>2021-07-31T13:49:00-03:00</published><updated>2021-07-31T13:49:00-03:00</updated><id>http://localhost:4000/2021/07/31/wildcard-subdomain-enum</id><content type="html" xml:base="http://localhost:4000/2021/07/31/wildcard-subdomain-enum"><![CDATA[<p><strong>TL;DR</strong></p>
 
-&lt;p&gt;Enumerating subdomains with wildcard records is tricky but not impossible, here
+<p>Enumerating subdomains with wildcard records is tricky but not impossible, here
 are some tips. Also, don’t trust wildcards as a security mechanism for hiding
-sensitive apps.&lt;/p&gt;
+sensitive apps.</p>
 
-&lt;h1 id=&quot;the-problem&quot;&gt;The problem&lt;/h1&gt;
+<h1 id="the-problem">The problem</h1>
 
-&lt;p&gt;If you did some subdomain brute-force enumeration in the wild you already
+<p>If you did some subdomain brute-force enumeration in the wild you already
 bumped into a record that resolves for any type of prefix. This is called a
 wildcard record and it can be configured by inserting a record entry with a
-label “&lt;strong&gt;*&lt;/strong&gt;”. This record will also resolve for other sublevels unless it is
-inhibited by another record entry.&lt;/p&gt;
+label “<strong>*</strong>”. This record will also resolve for other sublevels unless it is
+inhibited by another record entry.</p>
 
-&lt;p&gt;Many companies use wildcard records as part of their architecture. A well-known
+<p>Many companies use wildcard records as part of their architecture. A well-known
 example is Slack which uses it for their workspaces. For example, today I asked
 my favorite DNS server to resolve the following records and got the same IP
-address:&lt;/p&gt;
+address:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;shopify.enterprise.slack.com 18.231.0.250
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shopify.enterprise.slack.com 18.231.0.250
 enterprise.slack.com 18.231.0.250
 big-name-non-existent.slack.com 18.231.0.250
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre></div></div>
 
-&lt;p&gt;In this case you might conclude that there is a wildcard record
-&lt;strong&gt;*.slack.com&lt;/strong&gt; and maybe we should ignore this domain in your subdomain
+<p>In this case you might conclude that there is a wildcard record
+<strong>*.slack.com</strong> and maybe we should ignore this domain in your subdomain
 enumeration. However, you could end up missing something like
-&lt;strong&gt;status.slack.com&lt;/strong&gt; which does not resolve to this address. Instead it has a
-CNAME pointing to another infrastructure that could be interesting to you.&lt;/p&gt;
+<strong>status.slack.com</strong> which does not resolve to this address. Instead it has a
+CNAME pointing to another infrastructure that could be interesting to you.</p>
 
-&lt;p&gt;It is curious how often subdomain enumeration tools mess up or do not handle
+<p>It is curious how often subdomain enumeration tools mess up or do not handle
 this kind of behaviour. Many times the wildcard records are just dropped
 without any further check. The problem is that you might lose some interesting
-apps by discarding them .&lt;/p&gt;
+apps by discarding them .</p>
 
-&lt;p&gt;With that in mind, adding a wildcard record can be a tempting strategy to hide
+<p>With that in mind, adding a wildcard record can be a tempting strategy to hide
 your own services like a needle in the haystack. I can’t blame anyone for doing
-that, but just keep in mind that this is not going to save you for long.&lt;/p&gt;
+that, but just keep in mind that this is not going to save you for long.</p>
 
-&lt;h1 id=&quot;finding-interesting-stuff&quot;&gt;Finding interesting stuff&lt;/h1&gt;
+<h1 id="finding-interesting-stuff">Finding interesting stuff</h1>
 
-&lt;p&gt;Thinking about how to make a better reconnaissance one could try to overcome
+<p>Thinking about how to make a better reconnaissance one could try to overcome
 this problem by treating enumeration in wildcard records differently. The
 response returned by the wildcard could be stored (sorted if it is multiple
 entries) and every subsequent DNS response would be compared with this one.
-Everytime we find a new response it would be saved in a map structure.&lt;/p&gt;
+Everytime we find a new response it would be saved in a map structure.</p>
 
-&lt;p&gt;This would make sure we have at least one subdomain that points to that new
-location that we found. However, &lt;em&gt;the world ain’t all sunshine and rainbows&lt;/em&gt;
+<p>This would make sure we have at least one subdomain that points to that new
+location that we found. However, <em>the world ain’t all sunshine and rainbows</em>
 and we could obviously have a different application sitting on a machine that
-will only show up when we set a specific Host header in the HTTP request.&lt;/p&gt;
+will only show up when we set a specific Host header in the HTTP request.</p>
 
-&lt;p&gt;Therefore, this is just something you could use to have more places to look for
+<p>Therefore, this is just something you could use to have more places to look for
 security vulnerabilities. There are many other more edgy cases (for example
 when including CNAME) that can happen when trying to find assets using DNS. I
-hope I can dig into that more in future posts.&lt;/p&gt;
+hope I can dig into that more in future posts.</p>
 
-&lt;p&gt;Do you have any tips for finding apps on records with wildcard?&lt;/p&gt;</content><author><name></name></author><summary type="html">TL;DR</summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part II</title><link href="http://localhost:4000/2019/06/01/re-wireless-repeater-2" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part II" /><published>2019-06-01T21:25:00-03:00</published><updated>2019-06-01T21:25:00-03:00</updated><id>http://localhost:4000/2019/06/01/re-wireless-repeater-2</id><content type="html" xml:base="http://localhost:4000/2019/06/01/re-wireless-repeater-2">&lt;p&gt;This is the second part of a series of posts about reverse engineering a
+<p>Do you have any tips for finding apps on records with wildcard?</p>]]></content><author><name></name></author><summary type="html"><![CDATA[TL;DR]]></summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part II</title><link href="http://localhost:4000/2019/06/01/re-wireless-repeater-2" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part II" /><published>2019-06-01T21:25:00-03:00</published><updated>2019-06-01T21:25:00-03:00</updated><id>http://localhost:4000/2019/06/01/re-wireless-repeater-2</id><content type="html" xml:base="http://localhost:4000/2019/06/01/re-wireless-repeater-2"><![CDATA[<p>This is the second part of a series of posts about reverse engineering a
 wireless repeater. Before reading this you might want to take a look at the
-&lt;a href=&quot;/2019/04/01/re-wireless-repeater&quot;&gt;first part&lt;/a&gt;, where I introduced the subject
+<a href="/2019/04/01/re-wireless-repeater">first part</a>, where I introduced the subject
 and explained how to gather some information without digging into the hardware.
 If you still haven’t downloaded the firmware of our target device you can get
-it &lt;a href=&quot;http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+it <a href="http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip">here</a>.</p>
 
-&lt;p&gt;Firstly, make sure you have extracted the zip file. Using the &lt;strong&gt;file&lt;/strong&gt; command we
-can verify that the firmware was compiled for Linux MIPS.&lt;/p&gt;
+<p>Firstly, make sure you have extracted the zip file. Using the <strong>file</strong> command we
+can verify that the firmware was compiled for Linux MIPS.</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ file fw_NPLUG_1_0_0_14.bin
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file fw_NPLUG_1_0_0_14.bin
 fw_NPLUG_1_0_0_14.bin: u-boot legacy uImage, Linux Kernel Image, Linux/MIPS, OS
 Kernel Image (lzma), 1731916 bytes, Wed Oct 12 17:28:28 2016, Load Address:
 0x80000000, Entry Point: 0x802CB000, Header CRC: 0xEC8AD091, Data CRC:
 0x3A3E5EAC
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre></div></div>
 
-&lt;p&gt;There is not much you can do with this file as it is. In order to extract
+<p>There is not much you can do with this file as it is. In order to extract
 useful stuff from it we need to find the offset of known file format signatures
 inside the binary. Once you know the offset you could extract the chunks using
-the Linux &lt;strong&gt;dd&lt;/strong&gt; tool.&lt;/p&gt;
+the Linux <strong>dd</strong> tool.</p>
 
-&lt;p&gt;However, it is not necessary to do that manually, instead, we will use a tool
-called &lt;a href=&quot;https://github.com/ReFirmLabs/binwalk&quot;&gt;&lt;em&gt;Binwalk&lt;/em&gt;&lt;/a&gt;. This tool was created
-by &lt;a href=&quot;http://www.devttys0.com/&quot;&gt;Craig Heffner&lt;/a&gt; and it helps a lot in the process of extracting file systems
-from firmware files.&lt;/p&gt;
+<p>However, it is not necessary to do that manually, instead, we will use a tool
+called <a href="https://github.com/ReFirmLabs/binwalk"><em>Binwalk</em></a>. This tool was created
+by <a href="http://www.devttys0.com/">Craig Heffner</a> and it helps a lot in the process of extracting file systems
+from firmware files.</p>
 
-&lt;h1 id=&quot;using-binwalk&quot;&gt;Using &lt;em&gt;Binwalk&lt;/em&gt;&lt;/h1&gt;
+<h1 id="using-binwalk">Using <em>Binwalk</em></h1>
 
-&lt;p&gt;Running &lt;em&gt;Binwalk&lt;/em&gt; against the firmware without specifying any options would
-give us the following output:&lt;/p&gt;
+<p>Running <em>Binwalk</em> against the firmware without specifying any options would
+give us the following output:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DECIMAL       HEXADECIMAL     DESCRIPTION
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
-0             0x0             uImage header, header size: 64 bytes, header CRC: 0xEC8AD091, created: 2016-10-12 17:28:28, image size: 1731916 bytes, Data Address: 0x80000000, Entry Point: 0x802CB000, data CRC: 0x3A3E5EAC, OS: Linux, CPU: MIPS, image type: OS Kernel Image, compression type: lzma, image name: &quot;Linux Kernel Image&quot;
+0             0x0             uImage header, header size: 64 bytes, header CRC: 0xEC8AD091, created: 2016-10-12 17:28:28, image size: 1731916 bytes, Data Address: 0x80000000, Entry Point: 0x802CB000, data CRC: 0x3A3E5EAC, OS: Linux, CPU: MIPS, image type: OS Kernel Image, compression type: lzma, image name: "Linux Kernel Image"
 64            0x40            LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 3829956 bytes
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre></div></div>
 
-&lt;p&gt;That means the binary has a header and some compressed data starting at offset
+<p>That means the binary has a header and some compressed data starting at offset
 0x40. This assumption might be true or not, the tool is just trying to
 interpret the bytes in the file.
-Using the &lt;strong&gt;xxd&lt;/strong&gt; tool we can examine the first bytes from the binary which
-refer to the header:&lt;/p&gt;
+Using the <strong>xxd</strong> tool we can examine the first bytes from the binary which
+refer to the header:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ xxd -l 64 fw_NPLUG_1_0_0_14.bin
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ xxd -l 64 fw_NPLUG_1_0_0_14.bin
 00000000: 2705 1956 ec8a d091 57fe 72bc 001a 6d4c  '..V....W.r...mL
-00000010: 8000 0000 802c b000 3a3e 5eac 0505 0203  …..,..:&amp;gt;^.....
+00000010: 8000 0000 802c b000 3a3e 5eac 0505 0203  …..,..:&gt;^.....
 00000020: 4c69 6e75 7820 4b65 726e 656c 2049 6d61  Linux Kernel Ima
 00000030: 6765 0000 0000 0000 0000 0000 0000 0000  ge..............
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre></div></div>
 
-&lt;p&gt;&lt;em&gt;Binwalk&lt;/em&gt; assumed the following chunk was related to some LZMA compressed data
-because of the signature &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5d 00 00 00 02&lt;/code&gt;. This signature might
-&lt;a href=&quot;lzma-file-format&quot;&gt;vary&lt;/a&gt; depending
-on the compression level used, but apparently it always start with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5d 00 00&lt;/code&gt;.
-Here is the start of the compressed data:&lt;/p&gt;
+<p><em>Binwalk</em> assumed the following chunk was related to some LZMA compressed data
+because of the signature <code class="language-plaintext highlighter-rouge">5d 00 00 00 02</code>. This signature might
+<a href="lzma-file-format">vary</a> depending
+on the compression level used, but apparently it always start with <code class="language-plaintext highlighter-rouge">5d 00 00</code>.
+Here is the start of the compressed data:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[...]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[...]
 00000040: 5d00 0000 02c4 703a 0000 0000 0000 006f  ].....p:.......o
-00000050: fdff ffa3 b7ff 473e 4815 7239 6151 b892  …...G&amp;gt;H.r9aQ..
-00000060: 28e6 a386 07f9 eee4 1e82 d32f c53a 3c01  (........../.:&amp;lt;.
+00000050: fdff ffa3 b7ff 473e 4815 7239 6151 b892  …...G&gt;H.r9aQ..
+00000060: 28e6 a386 07f9 eee4 1e82 d32f c53a 3c01  (........../.:&lt;.
 00000070: 4bb1 7ec9 8a8a 4d2f a30d d97f a6e3 8c23  K.~...M/.......#
 00000080: 1153 e059 18c5 758a e277 f886 f31f 9269  .S.Y..u..w.....i
 00000090: 516e f9a2 84d4 b228 94f8 6af5 1bf9 141e  Qn.....(..j.....
 [...]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre></div></div>
 
-&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-e (--extract)&lt;/code&gt; flag, will extract the files identified during a
-signature scan and the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-M (--matryoshka)&lt;/code&gt; flag will perform this
-extraction recursively. There is also another really useful option in &lt;em&gt;Binwalk&lt;/em&gt;
+<p>The <code class="language-plaintext highlighter-rouge">-e (--extract)</code> flag, will extract the files identified during a
+signature scan and the <code class="language-plaintext highlighter-rouge">-M (--matryoshka)</code> flag will perform this
+extraction recursively. There is also another really useful option in <em>Binwalk</em>
 which allows an entropy analysis of the file. This can be helpful when
-&lt;em&gt;Binwalk&lt;/em&gt;
-doesn’t work properly on the target file and you have to do a manual analysis.&lt;/p&gt;
+<em>Binwalk</em>
+doesn’t work properly on the target file and you have to do a manual analysis.</p>
 
-&lt;p&gt;For example, taking a step back, if we used &lt;em&gt;Binwalk&lt;/em&gt; extraction only once, we
-would find a file named &lt;strong&gt;40&lt;/strong&gt; (this number refers to its offset in hexadecimal).
-Using &lt;em&gt;Binwalk&lt;/em&gt; with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-E (--entropy)&lt;/code&gt; flag in this file will pop the
-following line chart (generated with &lt;em&gt;pyqtgraph&lt;/em&gt;).&lt;/p&gt;
+<p>For example, taking a step back, if we used <em>Binwalk</em> extraction only once, we
+would find a file named <strong>40</strong> (this number refers to its offset in hexadecimal).
+Using <em>Binwalk</em> with the <code class="language-plaintext highlighter-rouge">-E (--entropy)</code> flag in this file will pop the
+following line chart (generated with <em>pyqtgraph</em>).</p>
 
-&lt;p&gt;&lt;img src=&quot;/assets/nplug/40.png&quot; alt=&quot;Entropy of file 40&quot; /&gt;
-&lt;br /&gt;&lt;/p&gt;
+<p><img src="/assets/nplug/40.png" alt="Entropy of file 40" />
+<br /></p>
 
-&lt;p&gt;The Y axis is the entropy and the X axis refers to the offset in that file.
+<p>The Y axis is the entropy and the X axis refers to the offset in that file.
 With this graph we can infer that there are some readable stuff in that file
 but there are some other regions with high entropy. A high entropy in a file
-probably means compressed or encrypted data, but it could also be just garbage.&lt;/p&gt;
+probably means compressed or encrypted data, but it could also be just garbage.</p>
 
-&lt;p&gt;The signature scan for this file would give us the following output:&lt;/p&gt;
+<p>The signature scan for this file would give us the following output:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ binwalk 40
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ binwalk 40
 DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
-2658360       0x289038        Linux kernel version &quot;2.6.21 (root@linux-qxix)
-(gcc version 3.4.2) #1086 Thu Oct 13 01:28:23 CST 2016&quot;
+2658360       0x289038        Linux kernel version "2.6.21 (root@linux-qxix)
+(gcc version 3.4.2) #1086 Thu Oct 13 01:28:23 CST 2016"
 2659360       0x289420        CRC32 polynomial table, little endian
 2686144       0x28FCC0        SHA256 hash constants, little endian
 2728378       0x29A1BA        Unix path: /mru/rcvseq/sendseq/lns debug
 reorderto
 2736880       0x29C2F0        Unix path: /etc/Wireless/RT2860AP/RT2860AP.dat
-2737968       0x29C730        XML document, version: &quot;1.0&quot;
+2737968       0x29C730        XML document, version: "1.0"
 2870768       0x2BCDF0        CRC32 polynomial table, little endian
 3059712       0x2EB000        LZMA compressed data, properties: 0x5D,
 dictionary size: 1048576 bytes, uncompressed size: 2943488 bytes
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre></div></div>
 
-&lt;p&gt;Performing another extraction with &lt;em&gt;Binwalk&lt;/em&gt; in the file &lt;strong&gt;40&lt;/strong&gt; will output
-another file named &lt;strong&gt;2EB000&lt;/strong&gt;. We can generate the entropy analysis line chart
-for the new file too.&lt;/p&gt;
+<p>Performing another extraction with <em>Binwalk</em> in the file <strong>40</strong> will output
+another file named <strong>2EB000</strong>. We can generate the entropy analysis line chart
+for the new file too.</p>
 
-&lt;p&gt;&lt;img src=&quot;/assets/nplug/2EB000.png&quot; alt=&quot;Entropy of file 2EB000&quot; /&gt;
-&lt;br /&gt;&lt;/p&gt;
+<p><img src="/assets/nplug/2EB000.png" alt="Entropy of file 2EB000" />
+<br /></p>
 
-&lt;p&gt;This time we can see a lot of regions in the file with data that is probably
+<p>This time we can see a lot of regions in the file with data that is probably
 readable. Not surprisingly, we have found the file system of the firmware. Of
 course, we could have simply extracted everything with just one command like
-the following demonstration:&lt;/p&gt;
+the following demonstration:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ binwalk -eM fw_NPLUG_1_0_0_14.bin
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ binwalk -eM fw_NPLUG_1_0_0_14.bin
 $ cd fw_NPLUG_1_0_0_14.bin.extracted/_40.extracted/_2EB000.extracted/cpio-root/
 $ tree
 .
 ├── bin
-│   ├── ash -&amp;gt; busybox
+│   ├── ash -&gt; busybox
 │   ├── ate
 │   ├── ated
 │   ├── busybox
-│   ├── cat -&amp;gt; busybox
-│   ├── chmod -&amp;gt; busybox
-│   ├── cp -&amp;gt; busybox
-│   ├── date -&amp;gt; busybox
+│   ├── cat -&gt; busybox
+│   ├── chmod -&gt; busybox
+│   ├── cp -&gt; busybox
+│   ├── date -&gt; busybox
 │   ├── default.cfg
 │   ├── dnrd
-│   ├── echo -&amp;gt; busybox
-│   ├── hostname -&amp;gt; busybox
+│   ├── echo -&gt; busybox
+│   ├── hostname -&gt; busybox
 │   ├── httpd
 │   ├── inadyn
 │   ├── iptables
 │   ├── iwconfig
 │   ├── iwpriv
-│   ├── kill -&amp;gt; busybox
-│   ├── ls -&amp;gt; busybox
+│   ├── kill -&gt; busybox
+│   ├── ls -&gt; busybox
 │   ├── miniupnpd
-│   ├── mkdir -&amp;gt; busybox
-│   ├── mount -&amp;gt; busybox
+│   ├── mkdir -&gt; busybox
+│   ├── mount -&gt; busybox
 │   ├── msg
 │   ├── mtd_write
 │   ├── netctrl
-│   ├── nvram_clear -&amp;gt; ralink_init
-│   ├── nvram_commit -&amp;gt; ralink_init
-│   ├── nvram_get -&amp;gt; ralink_init
-│   ├── nvram_set -&amp;gt; ralink_init
-│   ├── nvram_show -&amp;gt; ralink_init
-│   ├── ping -&amp;gt; busybox
+│   ├── nvram_clear -&gt; ralink_init
+│   ├── nvram_commit -&gt; ralink_init
+│   ├── nvram_get -&gt; ralink_init
+│   ├── nvram_set -&gt; ralink_init
+│   ├── nvram_show -&gt; ralink_init
+│   ├── ping -&gt; busybox
 │   ├── pppd
-│   ├── ps -&amp;gt; busybox
+│   ├── ps -&gt; busybox
 │   ├── ralink_init
-│   ├── rm -&amp;gt; busybox
-│   ├── sh -&amp;gt; busybox
+│   ├── rm -&gt; busybox
+│   ├── sh -&gt; busybox
 │   ├── sntp
 │   ├── switch
 │   ├── tenda_chck_conn
@@ -427,34 +427,34 @@ $ tree
 │   │   └── RT5350_AP_1T1R_V1_0.bin
 │   └── xml
 ├── home
-├── init -&amp;gt; bin/busybox
+├── init -&gt; bin/busybox
 ├── lib
 │   ├── ipsec
 │   ├── ld-uClibc-0.9.28.so
-│   ├── ld-uClibc.so.0 -&amp;gt; ld-uClibc-0.9.28.so
+│   ├── ld-uClibc.so.0 -&gt; ld-uClibc-0.9.28.so
 │   ├── libcrypt-0.9.28.so
-│   ├── libcrypt.so -&amp;gt; libcrypt-0.9.28.so
-│   ├── libcrypt.so.0 -&amp;gt; libcrypt-0.9.28.so
-│   ├── libc.so -&amp;gt; libuClibc-0.9.28.so
-│   ├── libc.so.0 -&amp;gt; libuClibc-0.9.28.so
+│   ├── libcrypt.so -&gt; libcrypt-0.9.28.so
+│   ├── libcrypt.so.0 -&gt; libcrypt-0.9.28.so
+│   ├── libc.so -&gt; libuClibc-0.9.28.so
+│   ├── libc.so.0 -&gt; libuClibc-0.9.28.so
 │   ├── libdl-0.9.28.so
-│   ├── libdl.so -&amp;gt; libdl-0.9.28.so
-│   ├── libdl.so.0 -&amp;gt; libdl-0.9.28.so
+│   ├── libdl.so -&gt; libdl-0.9.28.so
+│   ├── libdl.so.0 -&gt; libdl-0.9.28.so
 │   ├── libiw.so.29
 │   ├── libnvram-0.9.28.so
-│   ├── libnvram.so -&amp;gt; libnvram-0.9.28.so
-│   ├── libnvram.so.0 -&amp;gt; libnvram-0.9.28.so
+│   ├── libnvram.so -&gt; libnvram-0.9.28.so
+│   ├── libnvram.so.0 -&gt; libnvram-0.9.28.so
 │   ├── libpthread-0.9.28.so
-│   ├── libpthread.so -&amp;gt; libpthread-0.9.28.so
-│   ├── libpthread.so.0 -&amp;gt; libpthread-0.9.28.so
+│   ├── libpthread.so -&gt; libpthread-0.9.28.so
+│   ├── libpthread.so.0 -&gt; libpthread-0.9.28.so
 │   ├── libresolv-0.9.28.so
-│   ├── libresolv.so -&amp;gt; libresolv-0.9.28.so
-│   ├── libresolv.so.0 -&amp;gt; libresolv-0.9.28.so
+│   ├── libresolv.so -&gt; libresolv-0.9.28.so
+│   ├── libresolv.so.0 -&gt; libresolv-0.9.28.so
 │   ├── libtenda_common.so
 │   ├── libuClibc-0.9.28.so
 │   ├── libutil-0.9.28.so
-│   ├── libutil.so -&amp;gt; libutil-0.9.28.so
-│   ├── libutil.so.0 -&amp;gt; libutil-0.9.28.so
+│   ├── libutil.so -&gt; libutil-0.9.28.so
+│   ├── libutil.so.0 -&gt; libutil-0.9.28.so
 │   └── modules
 │       ├── 2.6.21
 │       │   └── kernel
@@ -467,546 +467,546 @@ $ tree
 ├── mnt
 ├── proc
 ├── sbin
-│   ├── arp -&amp;gt; ../bin/busybox
-│   ├── halt -&amp;gt; ../bin/busybox
-│   ├── ifconfig -&amp;gt; ../bin/busybox
-│   ├── init -&amp;gt; ../bin/busybox
-│   ├── insmod -&amp;gt; ../bin/busybox
-│   ├── lsmod -&amp;gt; ../bin/busybox
-│   ├── poweroff -&amp;gt; ../bin/busybox
+│   ├── arp -&gt; ../bin/busybox
+│   ├── halt -&gt; ../bin/busybox
+│   ├── ifconfig -&gt; ../bin/busybox
+│   ├── init -&gt; ../bin/busybox
+│   ├── insmod -&gt; ../bin/busybox
+│   ├── lsmod -&gt; ../bin/busybox
+│   ├── poweroff -&gt; ../bin/busybox
 │   ├── pppoe.sh
-│   ├── reboot -&amp;gt; ../bin/busybox
-│   ├── rmmod -&amp;gt; ../bin/busybox
-│   ├── route -&amp;gt; ../bin/busybox
-│   └── vconfig -&amp;gt; ../bin/busybox
+│   ├── reboot -&gt; ../bin/busybox
+│   ├── rmmod -&gt; ../bin/busybox
+│   ├── route -&gt; ../bin/busybox
+│   └── vconfig -&gt; ../bin/busybox
 ├── sys
 ├── tmp
 ├── usr
 │   ├── bin
-│   │   ├── expr -&amp;gt; ../../bin/busybox
-│   │   ├── killall -&amp;gt; ../../bin/busybox
-│   │   └── top -&amp;gt; ../../bin/busybox
+│   │   ├── expr -&gt; ../../bin/busybox
+│   │   ├── killall -&gt; ../../bin/busybox
+│   │   └── top -&gt; ../../bin/busybox
 │   ├── codepages
 │   └── sbin
-│       ├── brctl -&amp;gt; ../../bin/busybox
-│       └── telnetd -&amp;gt; ../../bin/busybox
+│       ├── brctl -&gt; ../../bin/busybox
+│       └── telnetd -&gt; ../../bin/busybox
 └── var
 
 41 directories, 185 files
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+</code></pre></div></div>
+<h1 id="conclusion">Conclusion</h1>
 
-&lt;p&gt;In this post we learned how to extract the file system from a firmware file.
+<p>In this post we learned how to extract the file system from a firmware file.
 Sometimes this task can be much harder than what was demonstrated here. A
 firmware file can be constructed in many different ways which makes it
-difficult to analyze a bunch of them.&lt;/p&gt;
+difficult to analyze a bunch of them.</p>
 
-&lt;p&gt;In the next part I am planning to go through the file system trying to find
-interesting stuff, stay tuned!&lt;/p&gt;
+<p>In the next part I am planning to go through the file system trying to find
+interesting stuff, stay tuned!</p>
 
-&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/ReFirmLabs/binwalk&quot;&gt;Binwalk&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cscott/lzma-purejs/blob/master/FORMAT.md#lzma-file-format&quot;&gt;Notes on the LZMA format&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://www.devttys0.com/&quot;&gt;/dev/ttys0&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to take a look at the first part, where I introduced the subject and explained how to gather some information without digging into the hardware. If you still haven’t downloaded the firmware of our target device you can get it here.</summary></entry><entry><title type="html">Cryptopals: The basics</title><link href="http://localhost:4000/2019/04/06/cryptopals-the-basics" rel="alternate" type="text/html" title="Cryptopals: The basics" /><published>2019-04-06T16:42:00-03:00</published><updated>2019-04-06T16:42:00-03:00</updated><id>http://localhost:4000/2019/04/06/cryptopals-the-basics</id><content type="html" xml:base="http://localhost:4000/2019/04/06/cryptopals-the-basics">&lt;p&gt;If you have &lt;strong&gt;any&lt;/strong&gt; kind of interest in crypto you should probably check this
-out.  Recently, I started doing the &lt;strong&gt;Cryptopals&lt;/strong&gt;, which are a series of
+<h1 id="references">References</h1>
+<ul>
+  <li><a href="https://github.com/ReFirmLabs/binwalk">Binwalk</a></li>
+  <li><a href="https://github.com/cscott/lzma-purejs/blob/master/FORMAT.md#lzma-file-format">Notes on the LZMA format</a></li>
+  <li><a href="http://www.devttys0.com/">/dev/ttys0</a></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[This is the second part of a series of posts about reverse engineering a wireless repeater. Before reading this you might want to take a look at the first part, where I introduced the subject and explained how to gather some information without digging into the hardware. If you still haven’t downloaded the firmware of our target device you can get it here.]]></summary></entry><entry><title type="html">Cryptopals: The basics</title><link href="http://localhost:4000/2019/04/06/cryptopals-the-basics" rel="alternate" type="text/html" title="Cryptopals: The basics" /><published>2019-04-06T16:42:00-03:00</published><updated>2019-04-06T16:42:00-03:00</updated><id>http://localhost:4000/2019/04/06/cryptopals-the-basics</id><content type="html" xml:base="http://localhost:4000/2019/04/06/cryptopals-the-basics"><![CDATA[<p>If you have <strong>any</strong> kind of interest in crypto you should probably check this
+out.  Recently, I started doing the <strong>Cryptopals</strong>, which are a series of
 cryptography challenges created by the formerly Matasano Security team. They
 are a collection of 48 exercises divided in 8 sets. I have just finished the
 first set but I can guarantee you that it was already a lot of fun and
-learning.&lt;/p&gt;
+learning.</p>
 
-&lt;p&gt;&lt;strong&gt;SPOILER ALERT&lt;/strong&gt;: This is post will give the solutions for the first set of
+<p><strong>SPOILER ALERT</strong>: This is post will give the solutions for the first set of
 exercises, if you are planning to do it, stop reading this now and try them by
 yourself. However, if you are still unsure if this is for you or not, maybe try
-skim reading through this post to see if you get interested.&lt;/p&gt;
+skim reading through this post to see if you get interested.</p>
 
-&lt;p&gt;While resolving the first set I had mixed feelings of love and hatred.
+<p>While resolving the first set I had mixed feelings of love and hatred.
 Sometimes I was able to get the idea but ended up making a programming mistake
 that would keep me stuck for while in one challenge or another. They stated in
 their website that this is a “relatively easy” set of challenges with the
 except of one. I can’t tell you about the further sets but one challenge in
-this set took me 2 days to get it right.&lt;/p&gt;
+this set took me 2 days to get it right.</p>
 
-&lt;p&gt;I decided to write my solutions in Node.js and this was a good way to learn
+<p>I decided to write my solutions in Node.js and this was a good way to learn
 about some quirks of the language that I was not used to face in a common daily
 programming session. You might also want to choose a new programming language
-to kill two birds with one stone.&lt;/p&gt;
+to kill two birds with one stone.</p>
 
-&lt;h1 id=&quot;challenge-1-convert-hex-to-base64&quot;&gt;Challenge 1: Convert hex to base64&lt;/h1&gt;
+<h1 id="challenge-1-convert-hex-to-base64">Challenge 1: Convert hex to base64</h1>
 
-&lt;p&gt;There is no mystery in here. If you were dealing with client-side JavaScript
+<p>There is no mystery in here. If you were dealing with client-side JavaScript
 you would be looking for atob and btoa, but in Node.js you will want to be
 familiar with the Buffer API. Needless to 
-say, you shouldn’t include any third-party libraries to solve the challenges.&lt;/p&gt;
+say, you shouldn’t include any third-party libraries to solve the challenges.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;hex&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;base64&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">Buffer</span>
+  <span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="dl">'</span><span class="s1">49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d</span><span class="dl">'</span><span class="p">,</span><span class="dl">'</span><span class="s1">hex</span><span class="dl">'</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="dl">'</span><span class="s1">base64</span><span class="dl">'</span><span class="p">)</span></code></pre></figure>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-2-fixed-xor&quot;&gt;Challenge 2: Fixed XOR&lt;/h1&gt;
+<h1 id="challenge-2-fixed-xor">Challenge 2: Fixed XOR</h1>
 
-&lt;p&gt;This challenge will introduce you to XOR operation for cryptographic purposes.
-The &lt;strong&gt;simple XOR cipher&lt;/strong&gt; is a type of additive cipher that was used in the
+<p>This challenge will introduce you to XOR operation for cryptographic purposes.
+The <strong>simple XOR cipher</strong> is a type of additive cipher that was used in the
 past to encrypt text, but it is clearly not safe since the ciphertext could be
 decrypted using character frequency analysis. On the other hand, the XOR
 operation is still frequently used in more complex ciphers, due to its
-simplicity and performance.&lt;/p&gt;
+simplicity and performance.</p>
 
-&lt;p&gt;The challenge asks for a function that takes two equal-length buffers and
+<p>The challenge asks for a function that takes two equal-length buffers and
 produces their XOR combination. A solution for this exercise would be to loop
 through one of the buffers doing a XOR with each correspondent byte from the
-other buffer. The code that can do this will be shown further in this post.&lt;/p&gt;
+other buffer. The code that can do this will be shown further in this post.</p>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-3-single-byte-xor-cipher&quot;&gt;Challenge 3: Single-byte XOR cipher&lt;/h1&gt;
+<h1 id="challenge-3-single-byte-xor-cipher">Challenge 3: Single-byte XOR cipher</h1>
 
-&lt;p&gt;Now that we already know how to cipher and decipher messages using XOR, things
+<p>Now that we already know how to cipher and decipher messages using XOR, things
 are going to become interesting. The challenge presents a hex encoded string
 that was XOR’d against a single character and require us to discover this key
 and decrypt the message. This can be achieved by brute-forcing the key and
 analysing the character frequency of the output messages. The output with the
-best score is probably the message decrypted.&lt;/p&gt;
+best score is probably the message decrypted.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
  * Break a single-byte XOR cipher and returns the message with the best score
  * @param {String} hex encoded ciphertext
  * @return {Object} key, msg and score
- */&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;breakSingleByte&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;plainText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tempBuffer&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+ */</span>
+<span class="kd">function</span> <span class="nx">breakSingleByte</span> <span class="p">(</span><span class="nx">ciphertext</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">plainText</span><span class="p">,</span> <span class="nx">tempBuffer</span>
+  <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[]</span>
 
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keyChar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keyChar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keyChar&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">keyChar</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span> <span class="nx">keyChar</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">keyChar</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
 
-    &lt;span class=&quot;nx&quot;&gt;tempBuffer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cipher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;hex&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fromCharCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keyChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    <span class="nx">tempBuffer</span> <span class="o">=</span> <span class="nx">cipher</span><span class="p">(</span>
+      <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="dl">'</span><span class="s1">hex</span><span class="dl">'</span><span class="p">),</span>
+      <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">(</span><span class="nx">keyChar</span><span class="p">))</span>
+    <span class="p">)</span>
 
-    &lt;span class=&quot;nx&quot;&gt;plainText&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tempBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    <span class="nx">plainText</span> <span class="o">=</span> <span class="nx">tempBuffer</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span>
 
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;[^\x&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;00-&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;7E&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;plainText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keyChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;plainText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;score&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;parseFloat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;calculateFrequency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;plainText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toFixed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="sr">/</span><span class="se">[^\x</span><span class="sr">00-</span><span class="se">\x</span><span class="sr">7E</span><span class="se">]</span><span class="sr">/g</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">plainText</span><span class="p">))</span>
+      <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+        <span class="na">key</span><span class="p">:</span> <span class="nx">keyChar</span><span class="p">,</span>
+        <span class="na">msg</span><span class="p">:</span> <span class="nx">plainText</span><span class="p">,</span>
+        <span class="na">score</span><span class="p">:</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">Util</span><span class="p">.</span><span class="nx">calculateFrequency</span><span class="p">(</span><span class="nx">plainText</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+      <span class="p">})</span>
+  <span class="p">}</span>
 
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+  <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">x</span> <span class="o">&amp;&amp;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&gt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span><span class="p">)</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;To calculate the score of a string according to the frequency of english
+<p>To calculate the score of a string according to the frequency of english
 letters you can find the percentual values on the Internet and sum them. Don’t
 forget to add the space character to your list, it took me some time to notice
-that.&lt;/p&gt;
+that.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
 * Computes the score of a string according to the frequency of letters
 * @param {String} string
 * @return {Number} score
-*/&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;calculateFrequency&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+*/</span>
+<span class="kd">function</span> <span class="nx">calculateFrequency</span> <span class="p">(</span><span class="nx">string</span><span class="p">)</span> <span class="p">{</span>
 
-  &lt;span class=&quot;cm&quot;&gt;/* Source: http://www.oxfordmathcenter.com/drupal7/node/353 */&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;charFrequency&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.12702&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.09056&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.08167&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.07507&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.06966&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.06749&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.06327&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.06094&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.05987&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.04253&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.04025&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02782&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02758&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;m&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02406&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02360&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02228&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02015&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01974&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01929&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01492&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.00978&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.00772&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.00153&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.00150&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.00095&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.00074&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt; &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  <span class="cm">/* Source: http://www.oxfordmathcenter.com/drupal7/node/353 */</span>
+  <span class="kd">const</span> <span class="nx">charFrequency</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="dl">'</span><span class="s1">e</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.12702</span><span class="p">,</span> <span class="dl">'</span><span class="s1">t</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.09056</span><span class="p">,</span> <span class="dl">'</span><span class="s1">a</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.08167</span><span class="p">,</span> <span class="dl">'</span><span class="s1">o</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.07507</span><span class="p">,</span> <span class="dl">'</span><span class="s1">i</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.06966</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">n</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.06749</span><span class="p">,</span> <span class="dl">'</span><span class="s1">s</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.06327</span><span class="p">,</span> <span class="dl">'</span><span class="s1">h</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.06094</span><span class="p">,</span> <span class="dl">'</span><span class="s1">r</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.05987</span><span class="p">,</span> <span class="dl">'</span><span class="s1">d</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.04253</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">l</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.04025</span><span class="p">,</span> <span class="dl">'</span><span class="s1">c</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.02782</span><span class="p">,</span> <span class="dl">'</span><span class="s1">u</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.02758</span><span class="p">,</span> <span class="dl">'</span><span class="s1">m</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.02406</span><span class="p">,</span> <span class="dl">'</span><span class="s1">w</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.02360</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">f</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.02228</span><span class="p">,</span> <span class="dl">'</span><span class="s1">g</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.02015</span><span class="p">,</span> <span class="dl">'</span><span class="s1">y</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.01974</span><span class="p">,</span> <span class="dl">'</span><span class="s1">p</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.01929</span><span class="p">,</span> <span class="dl">'</span><span class="s1">b</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.01492</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">v</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.00978</span><span class="p">,</span> <span class="dl">'</span><span class="s1">k</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.00772</span><span class="p">,</span> <span class="dl">'</span><span class="s1">j</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.00153</span><span class="p">,</span> <span class="dl">'</span><span class="s1">x</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.00150</span><span class="p">,</span> <span class="dl">'</span><span class="s1">q</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.00095</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">z</span><span class="dl">'</span><span class="p">:</span> <span class="mf">0.00074</span><span class="p">,</span> <span class="dl">'</span><span class="s1"> </span><span class="dl">'</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="p">}</span>
 
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toLowerCase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;charFrequency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+  <span class="k">return</span> <span class="nx">string</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="dl">''</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">sum</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">sum</span> <span class="o">+</span> <span class="p">(</span><span class="nx">charFrequency</span><span class="p">[</span><span class="nx">value</span><span class="p">]</span> <span class="o">||</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;If everything works fine, we will get the decrypted message:&lt;/p&gt;
+<p>If everything works fine, we will get the decrypted message:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Cooking MC\'s like a pound of bacon
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cooking MC\'s like a pound of bacon
+</code></pre></div></div>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-4-detect-single-character-xor&quot;&gt;Challenge 4: Detect single-character XOR&lt;/h1&gt;
+<h1 id="challenge-4-detect-single-character-xor">Challenge 4: Detect single-character XOR</h1>
 
-&lt;p&gt;This time we were given a file containing a lot of encrypted strings. The goal
+<p>This time we were given a file containing a lot of encrypted strings. The goal
 was to find the string that was encrypted with single-character XOR, but we
 know from the previous exercise that decrypting it would be really easy too. We
 can use the function from the previous challenge to brute-force each string as
-a single-byte XOR cipher and find out the one with the best score.&lt;/p&gt;
+a single-byte XOR cipher and find out the one with the best score.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;decrypted&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[],&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">decrypted</span> <span class="o">=</span> <span class="p">[],</span> <span class="nx">result</span>
 
-&lt;span class=&quot;nx&quot;&gt;strings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;XOR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;breakSingleByte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+<span class="nx">strings</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">string</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">result</span> <span class="o">=</span> <span class="nx">XOR</span><span class="p">.</span><span class="nx">breakSingleByte</span><span class="p">(</span><span class="nx">string</span><span class="p">)</span>
 
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;string&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;line&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;decrypted&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  <span class="k">if</span> <span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">string</span> <span class="o">=</span> <span class="nx">string</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">line</span>   <span class="o">=</span> <span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="nx">decrypted</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">})</span>
 
-&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;decrypted&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+<span class="nx">result</span> <span class="o">=</span> <span class="nx">decrypted</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&gt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">)</span></code></pre></figure>
 
-&lt;p&gt;If everything works fine, we will get the decrypted message:&lt;/p&gt;
+<p>If everything works fine, we will get the decrypted message:</p>
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Now that the party is jumping\n
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Now that the party is jumping\n
+</code></pre></div></div>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-5-implement-repeating-key-xor&quot;&gt;Challenge 5: Implement repeating-key XOR&lt;/h1&gt;
+<h1 id="challenge-5-implement-repeating-key-xor">Challenge 5: Implement repeating-key XOR</h1>
 
-&lt;p&gt;This challenge is similar to the Challenge #2, but this time the message length
-is bigger than the key length, so we will use the &lt;a href=&quot;https://en.wikipedia.org/wiki/Vigenère_cipher&quot;&gt;Vigenère
-cipher&lt;/a&gt;. In this case, the key
+<p>This challenge is similar to the Challenge #2, but this time the message length
+is bigger than the key length, so we will use the <a href="https://en.wikipedia.org/wiki/Vigenère_cipher">Vigenère
+cipher</a>. In this case, the key
 needs to be repeated to cipher the whole message. Maybe this challenge could be
-positioned after the second one.&lt;/p&gt;
+positioned after the second one.</p>
 
-&lt;p&gt;In order to reuse code, some of the functions were created in a separated file.
+<p>In order to reuse code, some of the functions were created in a separated file.
 Since XOR is a commonly used operation, I decided to create a function that
 will XOR two buffers repeating the smallest one which would be the key. This
-function could be used with fixed or repeating-key XOR.&lt;/p&gt;
+function could be used with fixed or repeating-key XOR.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
  * XOR two buffers repeating the smallest
  * @param {Buffer} msg
  * @param {Buffer} key
  * @return {Buffer} result
- */&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cipher&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+ */</span>
+<span class="kd">function</span> <span class="nx">cipher</span> <span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
 
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+  <span class="k">if</span> <span class="p">(</span><span class="nx">key</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+    <span class="p">[</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">key</span><span class="p">,</span> <span class="nx">msg</span><span class="p">]</span>
 
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">alloc</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
 
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;^&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">,</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">^</span> <span class="nx">key</span><span class="p">[</span><span class="nx">j</span> <span class="o">%</span> <span class="nx">key</span><span class="p">.</span><span class="nx">length</span><span class="p">]</span>
 
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+  <span class="k">return</span> <span class="nx">result</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;Ciphering the message with the above function and converting the result to a
-hex string will give the expected output.&lt;/p&gt;
+<p>Ciphering the message with the above function and converting the result to a
+hex string will give the expected output.</p>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-6-break-repeating-key-xor&quot;&gt;Challenge 6: Break repeating-key XOR&lt;/h1&gt;
+<h1 id="challenge-6-break-repeating-key-xor">Challenge 6: Break repeating-key XOR</h1>
 
-&lt;p&gt;&lt;em&gt;“It is officially on, now.”&lt;/em&gt;
+<p><em>“It is officially on, now.”</em>
 This one took me a while to make it work right. They give you a file containing
 a message that is encrypted with repeating-xor and encoded in base64. This
 challenge is when you put together everything you learned until now.
-Fortunately, they give you the steps to do it.&lt;/p&gt;
+Fortunately, they give you the steps to do it.</p>
 
-&lt;p&gt;In order to get this one right, you will need to use something called the
-&lt;a href=&quot;https://en.wikipedia.org/wiki/Hamming_distance&quot;&gt;Hamming distance&lt;/a&gt;, which is
+<p>In order to get this one right, you will need to use something called the
+<a href="https://en.wikipedia.org/wiki/Hamming_distance">Hamming distance</a>, which is
 the number of different position between two symbols. In this case, we need to
-calculate the number of differing bits between the two strings.&lt;/p&gt;
+calculate the number of differing bits between the two strings.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
 * Calculates the Hamming distance between two strings
 * @param {String} string1
 * @param {String} string2
 * @return {Number} distance 
-*/&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;calculateDistance&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;string2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;distance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;second&lt;/span&gt;
+*/</span>
+<span class="kd">function</span> <span class="nx">calculateDistance</span> <span class="p">(</span><span class="nx">string1</span><span class="p">,</span> <span class="nx">string2</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">distance</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="kd">var</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span>
 
-  &lt;span class=&quot;nx&quot;&gt;string1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;ascii&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;string2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;ascii&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  <span class="nx">string1</span> <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">string1</span> <span class="o">||</span> <span class="dl">'</span><span class="s1">0</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">ascii</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nx">string2</span> <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">string2</span> <span class="o">||</span> <span class="dl">'</span><span class="s1">0</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">ascii</span><span class="dl">'</span><span class="p">)</span>
 
-  &lt;span class=&quot;c1&quot;&gt;// compose the binary representation of the strings &lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;string1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dec2bin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+  <span class="c1">// compose the binary representation of the strings </span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">string1</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">first</span> <span class="o">+=</span> <span class="nx">dec2bin</span><span class="p">(</span><span class="nx">string1</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
 
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;string2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;second&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dec2bin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;string2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">string2</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">second</span> <span class="o">+=</span> <span class="nx">dec2bin</span><span class="p">(</span><span class="nx">string2</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
 
-  &lt;span class=&quot;c1&quot;&gt;// count the number of different bits&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;^&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;distance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;
+  <span class="c1">// count the number of different bits</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">first</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">first</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">^</span> <span class="nx">second</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+      <span class="nx">distance</span><span class="o">++</span>
 
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;distance&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  <span class="k">return</span> <span class="nx">distance</span>
+<span class="p">}</span>
 
-&lt;span class=&quot;cm&quot;&gt;/**
+<span class="cm">/**
 * Converts a decimal number to a 8 char binary representation
 * @param {Number} decimal number
 * @return {String} binary representation
-*/&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dec2bin&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;binaryNum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dec&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;binaryNum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;binaryNum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;binaryNum&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;binaryNum&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+*/</span>
+<span class="kd">function</span> <span class="nx">dec2bin</span> <span class="p">(</span><span class="nx">dec</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">binaryNum</span> <span class="o">=</span> <span class="p">(</span><span class="nx">dec</span> <span class="o">&gt;&gt;&gt;</span> <span class="mi">0</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="nx">binaryNum</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="nx">binaryNum</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">0</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">binaryNum</span>
+  <span class="k">return</span> <span class="nx">binaryNum</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;The first thing you need to do is to figure out the size of the key. Unless you
+<p>The first thing you need to do is to figure out the size of the key. Unless you
 have a crystal ball at home, you can start guessing. They suggest values from 2
-to 40.&lt;/p&gt;
+to 40.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
 * Test all key sizes from 2 to 40 and returns the best one
 * @param {String} msg
 * @return {Number} keysize
-*/&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;findKeySize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+*/</span>
+<span class="kd">function</span> <span class="nx">findKeySize</span> <span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[]</span>
 
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;score&lt;/span&gt;   &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;testKeySize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">keysize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span> <span class="nx">keysize</span> <span class="o">&lt;=</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">keysize</span><span class="o">++</span><span class="p">)</span>
+    <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+      <span class="na">keysize</span> <span class="p">:</span> <span class="nx">keysize</span><span class="p">,</span>
+      <span class="na">score</span>   <span class="p">:</span> <span class="nx">testKeySize</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span>
+    <span class="p">})</span>
 
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+  <span class="k">return</span> <span class="nx">results</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">score</span> <span class="o">&lt;</span> <span class="nx">y</span><span class="p">.</span><span class="nx">score</span> <span class="p">?</span> <span class="nx">x</span> <span class="p">:</span> <span class="nx">y</span><span class="p">).</span><span class="nx">keysize</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;If you are wondering what kind of test is that, no worries, they explain you
+<p>If you are wondering what kind of test is that, no worries, they explain you
 how to do it. It basically consists of getting the first two chunks of KEYSIZE
 bytes from the ciphertext, computing the Hamming distance between them,
 repeating this process a couple of times and normalizing the result. The
 KEYSIZE which gives the least distance between the chunks of bytes in the
-ciphertext is probably the right one.&lt;/p&gt;
+ciphertext is probably the right one.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
 * Given a message and the size of a key, returns the average hamming distance
 * of between chunks of that message
 * @param {String} msg
 * @param {Number} keysize
 * @return {Number} distance
-*/&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;testKeySize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;second&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TESTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// arbitrary&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+*/</span>
+<span class="kd">function</span> <span class="nx">testKeySize</span> <span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">first</span><span class="p">,</span> <span class="nx">second</span>
+  <span class="kd">const</span> <span class="nx">TESTS</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1">// arbitrary</span>
+  <span class="kd">var</span> <span class="nx">score</span>   <span class="o">=</span> <span class="mi">0</span>
 
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TESTS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;slice&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;second&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;slice&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;calculateDistance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">TESTS</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">first</span>  <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">keysize</span> <span class="o">*</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">keysize</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="nx">second</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">keysize</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="nx">keysize</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="nx">score</span> <span class="o">+=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">calculateDistance</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">)</span>
+  <span class="p">}</span>
 
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;score&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;TESTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+  <span class="k">return</span> <span class="nx">score</span> <span class="o">/</span> <span class="p">(</span><span class="nx">TESTS</span> <span class="o">*</span> <span class="nx">keysize</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;Once you have the KEYSIZE, you can use the following strategy to solve the
-challenge:&lt;/p&gt;
+<p>Once you have the KEYSIZE, you can use the following strategy to solve the
+challenge:</p>
 
-&lt;ol&gt;
-  &lt;li&gt;Divide the ciphertext into blocks of KEYSIZE length;&lt;/li&gt;
-  &lt;li&gt;Transpose the blocks: make a block that is the first byte of every block,
-and a block that is the second byte of every block, and so on;&lt;/li&gt;
-  &lt;li&gt;Solve each block as it was single-character XOR;&lt;/li&gt;
-  &lt;li&gt;For each block, the single-byte XOR key that produces the best output is
-the XOR key byte for that block;&lt;/li&gt;
-  &lt;li&gt;Put them together and you have the key;&lt;/li&gt;
-  &lt;li&gt;Decipher the message with the key you obtained.&lt;/li&gt;
-&lt;/ol&gt;
+<ol>
+  <li>Divide the ciphertext into blocks of KEYSIZE length;</li>
+  <li>Transpose the blocks: make a block that is the first byte of every block,
+and a block that is the second byte of every block, and so on;</li>
+  <li>Solve each block as it was single-character XOR;</li>
+  <li>For each block, the single-byte XOR key that produces the best output is
+the XOR key byte for that block;</li>
+  <li>Put them together and you have the key;</li>
+  <li>Decipher the message with the key you obtained.</li>
+</ol>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keyScores&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">,</span> <span class="nx">blocks</span><span class="p">,</span> <span class="nx">msg</span><span class="p">,</span> <span class="nx">result</span>
+<span class="kd">var</span> <span class="nx">keyScores</span> <span class="o">=</span> <span class="p">[]</span>
 
-&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;readFileSync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;../res/6.txt&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;utf-8&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;base64&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;XOR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;findKeySize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;blocks&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;divideInBlocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;blocks&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;transposeBlocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;findKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;XOR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cipher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+<span class="nx">msg</span>     <span class="o">=</span> <span class="nx">Buffer</span><span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="dl">'</span><span class="s1">../res/6.txt</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">utf-8</span><span class="dl">'</span><span class="p">),</span> <span class="dl">'</span><span class="s1">base64</span><span class="dl">'</span><span class="p">)</span>
+<span class="nx">keysize</span> <span class="o">=</span> <span class="nx">XOR</span><span class="p">.</span><span class="nx">findKeySize</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span>
+<span class="nx">blocks</span>  <span class="o">=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">divideInBlocks</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span>
+<span class="nx">blocks</span>  <span class="o">=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">transposeBlocks</span><span class="p">(</span><span class="nx">blocks</span><span class="p">,</span> <span class="nx">keysize</span><span class="p">)</span>
+<span class="nx">key</span>     <span class="o">=</span> <span class="nx">findKey</span><span class="p">(</span><span class="nx">blocks</span><span class="p">)</span>
+<span class="nx">result</span>  <span class="o">=</span> <span class="nx">XOR</span><span class="p">.</span><span class="nx">cipher</span><span class="p">(</span><span class="nx">msg</span><span class="p">,</span> <span class="nx">key</span><span class="p">).</span><span class="nx">toString</span><span class="p">()</span></code></pre></figure>
 
-&lt;p&gt;Using this key against the file will give you the lyrics of &lt;a href=&quot;https://www.youtube.com/watch?v=zNJ8_Dh3Onk&quot;&gt;this
-song&lt;/a&gt;.&lt;/p&gt;
+<p>Using this key against the file will give you the lyrics of <a href="https://www.youtube.com/watch?v=zNJ8_Dh3Onk">this
+song</a>.</p>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-7-aes-in-ecb-mode&quot;&gt;Challenge 7: AES in ECB mode&lt;/h1&gt;
+<h1 id="challenge-7-aes-in-ecb-mode">Challenge 7: AES in ECB mode</h1>
 
-&lt;p&gt;After solving the previous challenge the last two seemed like a walk in the
+<p>After solving the previous challenge the last two seemed like a walk in the
 park. This is an introduction to the block cipher
-&lt;a href=&quot;https://en.wikipedia.org/wiki/Advanced_Encryption_Standard&quot;&gt;AES&lt;/a&gt;. A &lt;a href=&quot;https://en.wikipedia.org/wiki/Block_cipher#Rijndael_&quot;&gt;block
-cipher&lt;/a&gt; is a
+<a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a>. A <a href="https://en.wikipedia.org/wiki/Block_cipher#Rijndael_">block
+cipher</a> is a
 deterministic algorithm which operates on fixed-length groups of bits. Examples
 of block ciphers are DES, RC5, Blowfish, AES. The following code will do the
-job of decrypting a base64 encoded ciphertext in Node.js:&lt;/p&gt;
+job of decrypting a base64 encoded ciphertext in Node.js:</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;cm&quot;&gt;/**
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="cm">/**
 * Decrypts a AES ciphertext with a given key and algorithm
 * @param {String} ciphertext
 * @param {String} key
 * @param {String} algorithm
 * @return {String} msg
-*/&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;decrypt&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;alg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;decipher&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;crypto&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createDecipheriv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;alg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;decipher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;base64&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;utf-8&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;decipher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;final&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;utf-8&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+*/</span>
+<span class="kd">function</span> <span class="nx">decrypt</span> <span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">alg</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">decipher</span> <span class="o">=</span> <span class="nx">crypto</span><span class="p">.</span><span class="nx">createDecipheriv</span><span class="p">(</span><span class="nx">alg</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span>
+  <span class="kd">var</span> <span class="nx">out</span> <span class="o">=</span> <span class="nx">decipher</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="dl">'</span><span class="s1">base64</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">utf-8</span><span class="dl">'</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nx">out</span> <span class="o">+=</span> <span class="nx">decipher</span><span class="p">.</span><span class="nx">final</span><span class="p">(</span><span class="dl">'</span><span class="s1">utf-8</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
 
-&lt;p&gt;If everything works fine, we will get the same lyrics of the previous
-challenge.&lt;/p&gt;
+<p>If everything works fine, we will get the same lyrics of the previous
+challenge.</p>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;challenge-8-detect-aes-in-ecb-mode&quot;&gt;Challenge 8: Detect AES in ECB mode&lt;/h1&gt;
+<h1 id="challenge-8-detect-aes-in-ecb-mode">Challenge 8: Detect AES in ECB mode</h1>
 
-&lt;p&gt;This challenges requires you to find which one of the ciphertexts in a file was
+<p>This challenges requires you to find which one of the ciphertexts in a file was
 encrytpted with AES in ECB mode. The ECB mode is simplest mode of encryption in
 which the message is divided into blocks and they are independently encrypted.
 The problem with this mode is that a block is always encrypted into the same
 ciphertext block. This is exactly the weakness you need to abuse in order to
 detect which ciphertext was encrypted in ECB mode, you will count the
-repetitions.&lt;/p&gt;
+repetitions.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;ciphertexts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cipherTextBlocks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;divideInBlocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">ciphertexts</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">cipherTextBlocks</span> <span class="o">=</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">divideInBlocks</span><span class="p">(</span><span class="nx">ciphertext</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
 
-  &lt;span class=&quot;nx&quot;&gt;cipherTextBlocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ciphertext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;repetitions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;countRepetitions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cipherTextBlocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+  <span class="nx">cipherTextBlocks</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">block</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+      <span class="na">line</span><span class="p">:</span> <span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="na">ciphertext</span><span class="p">:</span> <span class="nx">ciphertext</span><span class="p">,</span>
+      <span class="na">repetitions</span><span class="p">:</span> <span class="nx">Util</span><span class="p">.</span><span class="nx">countRepetitions</span><span class="p">(</span><span class="nx">block</span><span class="p">,</span> <span class="nx">cipherTextBlocks</span><span class="p">)</span>
+    <span class="p">})</span>
+  <span class="p">})</span>
+<span class="p">})</span></code></pre></figure>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+<h1 id="conclusion">Conclusion</h1>
 
-&lt;p&gt;The complete source code of the solutions you can find on my
-&lt;a href=&quot;https://github.com/patrickrbc/cryptopals&quot;&gt;Github&lt;/a&gt;. If you solved this first
-set of exercises you have the knowledge of performing the following tasks:&lt;/p&gt;
+<p>The complete source code of the solutions you can find on my
+<a href="https://github.com/patrickrbc/cryptopals">Github</a>. If you solved this first
+set of exercises you have the knowledge of performing the following tasks:</p>
 
-&lt;ul&gt;
-  &lt;li&gt;Convert between data base64, hex, binary&lt;/li&gt;
-  &lt;li&gt;Detect and decrypt single-character XOR ciphers&lt;/li&gt;
-  &lt;li&gt;Break repeating-key XOR ciphers&lt;/li&gt;
-  &lt;li&gt;Detect and decipher AES in ECB mode&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+  <li>Convert between data base64, hex, binary</li>
+  <li>Detect and decrypt single-character XOR ciphers</li>
+  <li>Break repeating-key XOR ciphers</li>
+  <li>Detect and decipher AES in ECB mode</li>
+</ul>
 
-&lt;p&gt;I am planning on doing the other sets soon. I will probably release the
-solutions on Github and make my comments about them here. Stay tuned!&lt;/p&gt;
+<p>I am planning on doing the other sets soon. I will probably release the
+solutions on Github and make my comments about them here. Stay tuned!</p>
 
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+<p><br /></p>
 
-&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://cryptopals.com&quot;&gt;The cryptopals crypto challenges&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals, which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises divided in 8 sets. I have just finished the first set but I can guarantee you that it was already a lot of fun and learning.</summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part I</title><link href="http://localhost:4000/2019/04/01/re-wireless-repeater" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part I" /><published>2019-04-01T17:21:00-03:00</published><updated>2019-04-01T17:21:00-03:00</updated><id>http://localhost:4000/2019/04/01/re-wireless-repeater</id><content type="html" xml:base="http://localhost:4000/2019/04/01/re-wireless-repeater">&lt;p&gt;Do you have an old router left behind in your room? Ever wondered how it really
+<h1 id="references">References</h1>
+<ul>
+  <li><a href="https://cryptopals.com">The cryptopals crypto challenges</a></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[If you have any kind of interest in crypto you should probably check this out. Recently, I started doing the Cryptopals, which are a series of cryptography challenges created by the formerly Matasano Security team. They are a collection of 48 exercises divided in 8 sets. I have just finished the first set but I can guarantee you that it was already a lot of fun and learning.]]></summary></entry><entry><title type="html">Reverse engineering a wireless repeater - Part I</title><link href="http://localhost:4000/2019/04/01/re-wireless-repeater" rel="alternate" type="text/html" title="Reverse engineering a wireless repeater - Part I" /><published>2019-04-01T17:21:00-03:00</published><updated>2019-04-01T17:21:00-03:00</updated><id>http://localhost:4000/2019/04/01/re-wireless-repeater</id><content type="html" xml:base="http://localhost:4000/2019/04/01/re-wireless-repeater"><![CDATA[<p>Do you have an old router left behind in your room? Ever wondered how it really
 works inside? Sit tight and get ready, because this is going to be a series of
 blog posts about reverse engineering a wireless repeater. The methodology here
-can be applied to other IoT devices.&lt;/p&gt;
+can be applied to other IoT devices.</p>
 
-&lt;p&gt;For the first part, we are going to understand the basics and learn how to
+<p>For the first part, we are going to understand the basics and learn how to
 collect information about our target. If you have any questions, please leave
-a comment below so I can improve this article.&lt;/p&gt;
+a comment below so I can improve this article.</p>
 
-&lt;h1 id=&quot;what-is-a-firmware&quot;&gt;What is a firmware?&lt;/h1&gt;
+<h1 id="what-is-a-firmware">What is a firmware?</h1>
 
-&lt;p&gt;The term “firmware” was firstly used in a magazine, published in 1967, and it
+<p>The term “firmware” was firstly used in a magazine, published in 1967, and it
 was referring to the CPU microcode existent between the hardware and the
 software. Today, the term is more broadly used to refer to the BIOS,
-bootloaders or embedded management systems.&lt;/p&gt;
+bootloaders or embedded management systems.</p>
 
-&lt;p&gt;There are many different kinds of firmwares files. It could be a complete
+<p>There are many different kinds of firmwares files. It could be a complete
 operation system with custom drivers and user applications, or it could contain
 only the user applications. Sometimes, it could be composed only of partial
 updates for an application, for example, the front-end of an embedded web
-server.&lt;/p&gt;
+server.</p>
 
-&lt;h1 id=&quot;why-should-we-do-this&quot;&gt;Why should we do this?&lt;/h1&gt;
+<h1 id="why-should-we-do-this">Why should we do this?</h1>
 
-&lt;p&gt;SOHO routers are the front door of your home network, therefore, a security
+<p>SOHO routers are the front door of your home network, therefore, a security
 issue in this device might compromise all the connected clients. On the other
 hand, SOHO routers are known for having security issues that are widely
 exploited by malwares. In addition, the source code of the firmware is usually
 not public. Unless someone does a reverse engineering on it, we won’t be able
-to know what is actually running inside it.&lt;/p&gt;
+to know what is actually running inside it.</p>
 
-&lt;p&gt;Another motivation is learning. Reversing SOHO routers is a good way to study
+<p>Another motivation is learning. Reversing SOHO routers is a good way to study
 about common low-level vulnerabilities and reversing due to its simplicity
-compared to modern systems.&lt;/p&gt;
+compared to modern systems.</p>
 
-&lt;h1 id=&quot;information-gathering&quot;&gt;Information gathering&lt;/h1&gt;
+<h1 id="information-gathering">Information gathering</h1>
 
-&lt;p&gt;For our case study we are going to use an old wireless repeater named
-&lt;strong&gt;NPLUG&lt;/strong&gt;, previously offered by the Brazilian company &lt;strong&gt;Intelbras&lt;/strong&gt;.
+<p>For our case study we are going to use an old wireless repeater named
+<strong>NPLUG</strong>, previously offered by the Brazilian company <strong>Intelbras</strong>.
 Unfortunately, I couldn’t find this product on their website anymore, but this
-is actually good for everyone. :)&lt;/p&gt;
+is actually good for everyone. :)</p>
 
-&lt;p&gt;Firstly, it is good to gather as much information about the device as you can.
+<p>Firstly, it is good to gather as much information about the device as you can.
 This allows us to get a general idea of how it works and uncover some weakness
 without the need to look inside. An easy way to do that is looking for the FCC
 ID number of the device. The FCC ID is the registration number of that device in
 Federal Communications Commission of United States. Using this number you can
-find more information like user manuals, specifications and internal pictures.&lt;/p&gt;
+find more information like user manuals, specifications and internal pictures.</p>
 
-&lt;p&gt;Once you have that number you can search for it using sites like &lt;a href=&quot;https://fccid.io/&quot;&gt;FCC
-ID.io&lt;/a&gt; or the official &lt;a href=&quot;https://www.fcc.gov/oet/ea/fccid&quot;&gt;FCC&lt;/a&gt; page. Depending on where are
+<p>Once you have that number you can search for it using sites like <a href="https://fccid.io/">FCC
+ID.io</a> or the official <a href="https://www.fcc.gov/oet/ea/fccid">FCC</a> page. Depending on where are
 your device distributed you might not find a FCC ID number on it, but another
-certification number instead.&lt;/p&gt;
+certification number instead.</p>
 
-&lt;p&gt;In Brazil, Anatel is the agency responsible for registering and regulating electronic devices.
+<p>In Brazil, Anatel is the agency responsible for registering and regulating electronic devices.
 Taking a look at the back of our device, between other information, we can find
 a number near the Anatel logo. This is the Anatel’s certification number and,
-fortunately, &lt;a href=&quot;https://fccid.io/&quot;&gt;FCC ID.io&lt;/a&gt; has a database for that too.&lt;/p&gt;
+fortunately, <a href="https://fccid.io/">FCC ID.io</a> has a database for that too.</p>
 
-&lt;p&gt;&lt;img src=&quot;/assets/nplug/nplug.png&quot; alt=&quot;NPLUG wireless repeater&quot; /&gt;&lt;/p&gt;
+<p><img src="/assets/nplug/nplug.png" alt="NPLUG wireless repeater" /></p>
 
-&lt;p&gt;I couldn’t find much information (beyond what was on the vendor’s website)
+<p>I couldn’t find much information (beyond what was on the vendor’s website)
 about the device using this number. However, if you are into embedded devices
 you might have noticed similarities between the NPLUG and other wireless
 repeaters. I had the same feeling and while looking at similar devices I
-discovered a “cousin” of NPLUG, which is the &lt;a href=&quot;https://www.aliexpress.com/item/English-Firmware-Tenda-A5S-Mini-Router-Pocket-WiFi-Wireless-Router-Client-Universal-Repeater-WISP-150Mbps-Ethernet/32751330210.html&quot;&gt;Tenda A5s&lt;/a&gt;.&lt;/p&gt;
+discovered a “cousin” of NPLUG, which is the <a href="https://www.aliexpress.com/item/English-Firmware-Tenda-A5S-Mini-Router-Pocket-WiFi-Wireless-Router-Client-Universal-Repeater-WISP-150Mbps-Ethernet/32751330210.html">Tenda A5s</a>.</p>
 
-&lt;p&gt;Searching for “&lt;em&gt;fcc id tenda a5s&lt;/em&gt;”, I was able to find the &lt;a href=&quot;https://fccid.io/V7TA5S&quot;&gt;FCC
-ID.io&lt;/a&gt; page for the Tenda product and within it I could internal
+<p>Searching for “<em>fcc id tenda a5s</em>”, I was able to find the <a href="https://fccid.io/V7TA5S">FCC
+ID.io</a> page for the Tenda product and within it I could internal
 pictures of the device. Looking at the information found I realized that both
 devices are almost the same. They were just sold with a different name, by a
 different company, in a different country. This is something that was
 previously pointed out by other security researchers. The code reuse between
 router manufacturers has propagated not only the same features but also the
-same security holes between devices.&lt;/p&gt;
+same security holes between devices.</p>
 
-&lt;p&gt;&lt;img src=&quot;/assets/nplug/internal.png&quot; alt=&quot;Internal photos Tenda A5S&quot; /&gt;&lt;/p&gt;
-&lt;center&gt;
-  &lt;small&gt;
+<p><img src="/assets/nplug/internal.png" alt="Internal photos Tenda A5S" /></p>
+<center>
+  <small>
     Source: https://fccid.io/V7TA5S/Internal-Photos/Internal-Photos-1889450
-  &lt;/small&gt;
-&lt;/center&gt;
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+  </small>
+</center>
+<p><br /></p>
 
-&lt;h1 id=&quot;firmware-acquisition&quot;&gt;Firmware acquisition&lt;/h1&gt;
+<h1 id="firmware-acquisition">Firmware acquisition</h1>
 
-&lt;p&gt;The vendor website usually provides a download section where you can get
+<p>The vendor website usually provides a download section where you can get
 manuals and the firmware file. If this is not the case you might get lucky
 searching for it in your search engine. For this series we are going to use the firmware of the NPLUG wireless repeater
-which can be acquired &lt;a href=&quot;http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+which can be acquired <a href="http://en.intelbras.com.br/sites/default/files/downloads/fw_nplug_1_0_0_14.zip">here</a>.</p>
 
-&lt;p&gt;When none of the above options is available you need to extract the firmware image from the hardware using one of the techniques that will be briefly described on the following posts.&lt;/p&gt;
+<p>When none of the above options is available you need to extract the firmware image from the hardware using one of the techniques that will be briefly described on the following posts.</p>
 
-&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+<h1 id="conclusion">Conclusion</h1>
 
-&lt;p&gt;This is all for now. I hope I had increased your appetite for what is coming
+<p>This is all for now. I hope I had increased your appetite for what is coming
 next.  Make sure you subscribe to the RSS feed and follow me on Twitter so you
-can see when the Part 2 is released.&lt;/p&gt;
+can see when the Part 2 is released.</p>
 
-&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+<h1 id="references">References</h1>
 
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://s3.eurecom.fr/docs/bh13us_zaddach.pdfk&quot;&gt;Zaddach, J., &amp;amp; Costin, A. (2013). Embedded devices security and firmware
-reverse engineering. Black-Hat USA.&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.fcc.gov/oet/ea/fccid&quot;&gt;FCC ID Search Form&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://fccid.io/&quot;&gt;FCC ID.io&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">Do you have an old router left behind in your room? Ever wondered how it really works inside? Sit tight and get ready, because this is going to be a series of blog posts about reverse engineering a wireless repeater. The methodology here can be applied to other IoT devices.</summary></entry></feed>
+<ul>
+  <li><a href="http://s3.eurecom.fr/docs/bh13us_zaddach.pdfk">Zaddach, J., &amp; Costin, A. (2013). Embedded devices security and firmware
+reverse engineering. Black-Hat USA.</a></li>
+  <li><a href="https://www.fcc.gov/oet/ea/fccid">FCC ID Search Form</a></li>
+  <li><a href="https://fccid.io/">FCC ID.io</a></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Do you have an old router left behind in your room? Ever wondered how it really works inside? Sit tight and get ready, because this is going to be a series of blog posts about reverse engineering a wireless repeater. The methodology here can be applied to other IoT devices.]]></summary></entry></feed>
