@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Custom Reddit feed using RSS | patrickrbc</title>
+<meta name="generator" content="Jekyll v3.9.5" />
+<meta property="og:title" content="Custom Reddit feed using RSS" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I have been using RSS for some years but in the last few (since the X saga began) I started to dive deeper into the possibilities with this protocol. It is one of those awesome things most people don’t have the opportunity to play with. I’m not sure why it doesn’t receive much attention, but it is not dead yet." />
+<meta property="og:description" content="I have been using RSS for some years but in the last few (since the X saga began) I started to dive deeper into the possibilities with this protocol. It is one of those awesome things most people don’t have the opportunity to play with. I’m not sure why it doesn’t receive much attention, but it is not dead yet." />
+<link rel="canonical" href="http://localhost:4000/2024/09/12/reddit-feed-generator" />
+<meta property="og:url" content="http://localhost:4000/2024/09/12/reddit-feed-generator" />
+<meta property="og:site_name" content="patrickrbc" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-09-12T20:12:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Custom Reddit feed using RSS" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-09-12T20:12:00-03:00","datePublished":"2024-09-12T20:12:00-03:00","description":"I have been using RSS for some years but in the last few (since the X saga began) I started to dive deeper into the possibilities with this protocol. It is one of those awesome things most people don’t have the opportunity to play with. I’m not sure why it doesn’t receive much attention, but it is not dead yet.","headline":"Custom Reddit feed using RSS","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2024/09/12/reddit-feed-generator"},"url":"http://localhost:4000/2024/09/12/reddit-feed-generator"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="patrickrbc" /></head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">patrickrbc</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+
+          <a class="page-link night-mode" href="#">&#9790;</a><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Custom Reddit feed using RSS</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-09-12T20:12:00-03:00" itemprop="datePublished">Sep 12, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>I have been using RSS for some years but in the last few (since the X saga
+began) I started to dive deeper into the possibilities with this protocol. It
+is one of those awesome things most people don’t have the opportunity to play
+with. I’m not sure why it doesn’t receive much attention, but <a href="https://isrssdead.com/">it is not dead
+yet</a>.</p>
+
+<p>For those who don’t know, RSS allows you to follow other content sources by
+subscribing to a feed. It was mainly used for blogs, but as of today it can
+be used with other kinds of feeds like podcasts, security vulnerability
+feeds, Mastodon accounts and many more.</p>
+
+<p>The idea is receiving all the content in one single application, being able
+to consume text offline, just from the sources you want, in chronological
+order, with few distractions without other intermediaries between you and the
+feed you follow.</p>
+
+<p>Reddit provides an RSS feed for every subreddit, which is really cool.
+However, following subreddits as RSS feeds sucks. There is always too much
+noise, duplicated posts, things that you would not even notice accessing the
+website depending on the filters you apply. If you follow many subreddit it
+becomes unmanageable.</p>
+
+<p>Last Saturday, I decided to fix this because I am on a quest to centralize as
+much as I can in my RSS reader. Fortunately, Reddit still provides an API
+that can allow us to fetch the content of a subreddit with filters applied.
+So I just needed to transform the response from the API into an RSS feed.</p>
+
+<p>A quick search revealed some GitHub projects that could be used for that, but
+they were too much for what I needed. I am always skeptical of using tools
+that are too generalist and have lots of dependencies, but I also didn’t want
+this to be another <a href="https://www.bytedrum.com/posts/art-of-finishing/">unfinished
+project</a>, so I had to draw
+a line. Thinking about the issue for a while, I decided it needed to:</p>
+
+<ul>
+  <li>Be really simple and have few dependencies</li>
+  <li>Consume Reddit API and spit out the RSS
+(<a href="https://datatracker.ietf.org/doc/html/rfc4287">Atom</a>) feed to be subscribed to</li>
+  <li>Filter posts by a given number of upvotes for each subreddit</li>
+  <li>Provide links to the link shared, if any, and to the post/comments page</li>
+  <li>Show the amount of comments</li>
+  <li>Show images</li>
+</ul>
+
+<p>An here is the result: <a href="https://github.com/patrickrbc/reddit-feed-generator">reddit-feed-generator</a></p>
+
+<p>After the setup I quickly noticed I needed a couple of things more to be
+happy:</p>
+
+<ul>
+  <li>Run the server on my Raspberry Pi (alongside with other utilities). So I
+would not have the process running on my machine all the time and it would
+look like I’m fetching from the web.</li>
+  <li>Provide an OPML file that can be imported by RSS reader so I don’t have to
+import every feed manually. Ok, this was not necessary but whatever.</li>
+</ul>
+
+<p>This project excites me because it empowers individuals to reduce reliance on
+large websites. Computers and the Internet are incredible tools, and the
+ability to tailor my experience to get more of what I want and less of what I
+don’t is liberating.</p>
+
+<p>The same method could be applied to other websites that you want to consume. The
+core idea is to ingest a source (via APIs, web scraping, or existing RSS feeds),
+filter and modify the content, and produce a customized RSS feed. I don’t expect
+people to use this code, but I hope it inspires someone to get your hands dirty.
+Build your own algorithm!</p>
+
+<h3 id="other-cool-stuff-ive-found-along-the-way">Other cool stuff I’ve found along the way</h3>
+
+<ul>
+  <li><a href="https://github.com/hnrss/hnrss">hnrss</a> provides custom, realtime RSS feeds for Hacker News</li>
+  <li><a href="https://github.com/AboutRSS/ALL-about-RSS">AboutRSS</a> is a collection of links
+related to RSS</li>
+</ul>
+
+  </div>
+<a class="u-url" href="/2024/09/12/reddit-feed-generator" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col footer-col-1 post-meta">
+      GPG: 53CA 9711 9A55 0C86
+    </div>
+
+    <!--<h2 class="footer-heading">patrickrbc</h2>-->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name"></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li>
+    <a
+      rel="me"
+      href="https://infosec.exchange/@patrickrbc"
+      target="_blank"
+      title=""
+    >
+      infosec.exchange/@patrickrbc
+    </a>
+  </li><li>
+    <a
+      href="https://github.com/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#github"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li><li>
+    <a
+      href="https://www.linkedin.com/in/patrickrbc"
+      target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#linkedin"
+        ></use>
+      </svg>
+      <span class="username">patrickrbc</span></a
+    >
+  </li><li>
+    <a href="/feed.xml" target="_blank"
+      ><svg class="svg-icon">
+        <use
+          xlink:href="/assets/minima-social-icons.svg#rss"
+        ></use>
+      </svg>
+      <span>feed.xml</span></a
+    >
+  </li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4C55092PY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Q4C55092PY');
+    </script>
+
+    <script>
+      window.onload = function () {
+        setTheme(localStorage.getItem('theme'))
+      }
+
+      document.querySelector('.night-mode').onclick = function () {
+        let current = localStorage.getItem('theme')
+        setTheme(toggleName(current))
+      }
+
+      function toggleName (theme) {
+        return theme === 'dark' ? 'light': 'dark'
+      }
+
+     function setTheme (theme) {
+        theme = theme || 'light'
+
+        localStorage.setItem('theme', theme)
+
+        document.querySelector('body').classList.add(theme)
+        document.querySelector('body').classList.remove(toggleName(theme))
+      }
+    </script>
+  </body>
+
+</html>

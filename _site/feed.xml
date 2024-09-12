@@ -1,4 +1,78 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-09-01T16:18:52-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle></subtitle><author><name></name></author><entry><title type="html">Migrating away from Jest and achieving over 90% reduction in running time</title><link href="http://localhost:4000/2024/03/16/jest-slow-tests" rel="alternate" type="text/html" title="Migrating away from Jest and achieving over 90% reduction in running time" /><published>2024-03-16T13:42:00-03:00</published><updated>2024-03-16T13:42:00-03:00</updated><id>http://localhost:4000/2024/03/16/jest-slow-tests</id><content type="html" xml:base="http://localhost:4000/2024/03/16/jest-slow-tests"><![CDATA[<p>Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-09-12T20:37:42-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">patrickrbc</title><subtitle></subtitle><author><name></name></author><entry><title type="html">Custom Reddit feed using RSS</title><link href="http://localhost:4000/2024/09/12/reddit-feed-generator" rel="alternate" type="text/html" title="Custom Reddit feed using RSS" /><published>2024-09-12T20:12:00-03:00</published><updated>2024-09-12T20:12:00-03:00</updated><id>http://localhost:4000/2024/09/12/reddit-feed-generator</id><content type="html" xml:base="http://localhost:4000/2024/09/12/reddit-feed-generator"><![CDATA[<p>I have been using RSS for some years but in the last few (since the X saga
+began) I started to dive deeper into the possibilities with this protocol. It
+is one of those awesome things most people don’t have the opportunity to play
+with. I’m not sure why it doesn’t receive much attention, but <a href="https://isrssdead.com/">it is not dead
+yet</a>.</p>
+
+<p>For those who don’t know, RSS allows you to follow other content sources by
+subscribing to a feed. It was mainly used for blogs, but as of today it can
+be used with other kinds of feeds like podcasts, security vulnerability
+feeds, Mastodon accounts and many more.</p>
+
+<p>The idea is receiving all the content in one single application, being able
+to consume text offline, just from the sources you want, in chronological
+order, with few distractions without other intermediaries between you and the
+feed you follow.</p>
+
+<p>Reddit provides an RSS feed for every subreddit, which is really cool.
+However, following subreddits as RSS feeds sucks. There is always too much
+noise, duplicated posts, things that you would not even notice accessing the
+website depending on the filters you apply. If you follow many subreddit it
+becomes unmanageable.</p>
+
+<p>Last Saturday, I decided to fix this because I am on a quest to centralize as
+much as I can in my RSS reader. Fortunately, Reddit still provides an API
+that can allow us to fetch the content of a subreddit with filters applied.
+So I just needed to transform the response from the API into an RSS feed.</p>
+
+<p>A quick search revealed some GitHub projects that could be used for that, but
+they were too much for what I needed. I am always skeptical of using tools
+that are too generalist and have lots of dependencies, but I also didn’t want
+this to be another <a href="https://www.bytedrum.com/posts/art-of-finishing/">unfinished
+project</a>, so I had to draw
+a line. Thinking about the issue for a while, I decided it needed to:</p>
+
+<ul>
+  <li>Be really simple and have few dependencies</li>
+  <li>Consume Reddit API and spit out the RSS
+(<a href="https://datatracker.ietf.org/doc/html/rfc4287">Atom</a>) feed to be subscribed to</li>
+  <li>Filter posts by a given number of upvotes for each subreddit</li>
+  <li>Provide links to the link shared, if any, and to the post/comments page</li>
+  <li>Show the amount of comments</li>
+  <li>Show images</li>
+</ul>
+
+<p>An here is the result: <a href="https://github.com/patrickrbc/reddit-feed-generator">reddit-feed-generator</a></p>
+
+<p>After the setup I quickly noticed I needed a couple of things more to be
+happy:</p>
+
+<ul>
+  <li>Run the server on my Raspberry Pi (alongside with other utilities). So I
+would not have the process running on my machine all the time and it would
+look like I’m fetching from the web.</li>
+  <li>Provide an OPML file that can be imported by RSS reader so I don’t have to
+import every feed manually. Ok, this was not necessary but whatever.</li>
+</ul>
+
+<p>This project excites me because it empowers individuals to reduce reliance on
+large websites. Computers and the Internet are incredible tools, and the
+ability to tailor my experience to get more of what I want and less of what I
+don’t is liberating.</p>
+
+<p>The same method could be applied to other websites that you want to consume. The
+core idea is to ingest a source (via APIs, web scraping, or existing RSS feeds),
+filter and modify the content, and produce a customized RSS feed. I don’t expect
+people to use this code, but I hope it inspires someone to get your hands dirty.
+Build your own algorithm!</p>
+
+<h3 id="other-cool-stuff-ive-found-along-the-way">Other cool stuff I’ve found along the way</h3>
+
+<ul>
+  <li><a href="https://github.com/hnrss/hnrss">hnrss</a> provides custom, realtime RSS feeds for Hacker News</li>
+  <li><a href="https://github.com/AboutRSS/ALL-about-RSS">AboutRSS</a> is a collection of links
+related to RSS</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[I have been using RSS for some years but in the last few (since the X saga began) I started to dive deeper into the possibilities with this protocol. It is one of those awesome things most people don’t have the opportunity to play with. I’m not sure why it doesn’t receive much attention, but it is not dead yet.]]></summary></entry><entry><title type="html">Migrating away from Jest and achieving over 90% reduction in running time</title><link href="http://localhost:4000/2024/03/16/jest-slow-tests" rel="alternate" type="text/html" title="Migrating away from Jest and achieving over 90% reduction in running time" /><published>2024-03-16T13:42:00-03:00</published><updated>2024-03-16T13:42:00-03:00</updated><id>http://localhost:4000/2024/03/16/jest-slow-tests</id><content type="html" xml:base="http://localhost:4000/2024/03/16/jest-slow-tests"><![CDATA[<p>Unfortunately, I’ve been using Jest since 2019. No offense to the Jest team – I’m pretty sure they’re awesome and way smarter than I am, but I wish I had made this move earlier in this project.</p>
 
 <p>I’m not talking about UI testing here, so assume everything I’m saying is about server-side JS. If you’re happy with Jest, don’t switch! I’m not trying to convince anyone. I’m just sharing my experience because I bet there are people out there in the same situation as I was.</p>
 
