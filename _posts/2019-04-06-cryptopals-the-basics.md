@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Cryptopals: The basics"
+description: "Solutions and lessons learned from the first set of the Cryptopals cryptography challenges, written in JavaScript."
 date:   2019-04-06 16:42:00 -0300
 comments: true
 ---

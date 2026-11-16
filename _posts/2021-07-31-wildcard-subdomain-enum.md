@@ -1,6 +1,7 @@
 ---
 layout: post
 title: 'Subdomain enumeration with wildcard records '
+description: "Tips for subdomain enumeration when DNS wildcard records are in place, and why wildcards should not be trusted to hide sensitive apps."
 date: 2021-07-31 13:49:00 -0300
 comments: true
 ---
