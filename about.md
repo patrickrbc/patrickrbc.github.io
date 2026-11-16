@@ -5,13 +5,20 @@ permalink: /about/
 ---
 
 I am a software engineer based in
-[Recife](https://goo.gl/maps/zydFuxsk54fsfzDk7){:target="\_blank"} with more
+[Recife](https://goo.gl/maps/zydFuxsk54fsfzDk7){:target="_blank"} with more
 than a decade of experience building and securing software systems. I started
 my career in software development, spent several years working in offensive
 security, and from 2020 to 2025 I founded and led engineering at
-[Unxpose](https://www.unxpose.com/){:target="\_blank"}, a platform that
-simplifies cybersecurity for busy companies. These days I focus on software
-engineering.
+[Unxpose](https://www.unxpose.com/){:target="_blank"}, a platform that
+simplifies cybersecurity for busy companies. Most recently, I worked as a Staff
+Engineer and Squad Lead at
+[SecurityScorecard](https://securityscorecard.com/){:target="_blank"}.
+
+I have experience leading engineering teams, and what I enjoy most is building
+products end to end, from shaping the idea and the technical design to shipping
+it to production and seeing it in the hands of users. If you would like to
+know more about my work, feel free to
+[request my resume by email](mailto:dev@patrickrbc.com?subject=Resume%20request).
 
 This is a place where I publish personal thoughts and things I learn while
 working with computers. I hope you can find something useful here. My security
