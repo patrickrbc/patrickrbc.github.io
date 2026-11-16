@@ -4,15 +4,18 @@ title: About
 permalink: /about/
 ---
 
-I am a software and security engineer based in
-[Recife](https://goo.gl/maps/zydFuxsk54fsfzDk7){:target="\_blank"} with 10+
-years of experience. Since 2020, I'm also building
-[Unxpose](https://www.unxpose.com/){:target="\_blank"} a solution that
-simplifies cybersecurity for busy companies.
+I am a software engineer based in
+[Recife](https://goo.gl/maps/zydFuxsk54fsfzDk7){:target="\_blank"} with more
+than a decade of experience building and securing software systems. I started
+my career in software development, spent several years working in offensive
+security, and from 2020 to 2025 I founded and led engineering at
+[Unxpose](https://www.unxpose.com/){:target="\_blank"}, a platform that
+simplifies cybersecurity for busy companies. These days I focus on software
+engineering.
 
-This is a place where I publish personal thoughts, research and things I learn
-while working with computers. I hope you can find something useful here. I
-haven't been doing much research lately, but you can find some old references
+This is a place where I publish personal thoughts and things I learn while
+working with computers. I hope you can find something useful here. My security
+research is not active anymore, but you can still find some old advisories
 below.
 
 <h4>Security advisories</h4>
@@ -34,18 +37,18 @@ below.
     </a>
   </li>
   <li>
-    <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-12457">
+    <a href="https://www.cve.org/CVERecord?id=CVE-2018-12457">
       CVE-2018-12457 - Privilege escalation in express-cart
     </a>
   </li>
   <li>
-    <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-3758">
+    <a href="https://www.cve.org/CVERecord?id=CVE-2018-3758">
       CVE-2018-3758 - Unrestricted file upload (RCE) in express-cart module
     </a>
   </li>
   <li>
     <a href="https://seclists.org/fulldisclosure/2017/Jan/49">
-      2017 - Persistent XSS in Ghost Blog 0.11.3 
+      2017 - Persistent XSS in Ghost Blog 0.11.3
     </a>
   </li>
 </ul>
