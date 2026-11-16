@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Custom Reddit feed using RSS
+description: "Building a custom Reddit feed with RSS to follow subreddits without the algorithm and distractions."
 date: 2024-09-12 20:12:00 -0300
 comments: true
 ---

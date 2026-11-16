@@ -1,36 +1,38 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-
 # Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
 title: patrickrbc
-
-author: ''
-description: ''
-baseurl: '' # the subpath of your site, e.g. /blog
-url: 'https://patrickrbc.com' # the base hostname & protocol for your site, e.g. http://example.com
+author:
+  name: Patrick Costa
+  url: https://patrickrbc.com/about/
+description: >-
+  Personal blog of Patrick Costa, a software engineer with a security
+  background. Notes on software engineering, security research and things
+  learned while working with computers.
+lang: en
+baseurl: ""
+url: "https://patrickrbc.com"
 
 social:
+  # Used by the footer links (_includes/social.html)
   github: patrickrbc
   linkedin: patrickrbc
   mastodon: patrickrbc
   rss: feed.xml
+  # Used by jekyll-seo-tag for structured data (JSON-LD)
+  name: Patrick Costa
+  links:
+    - https://github.com/patrickrbc
+    - https://www.linkedin.com/in/patrickrbc
+    - https://infosec.exchange/@patrickrbc
 
 # Build settings
 markdown: kramdown
+highlighter: rouge
 theme: minima
 
-highlighter: rouge
+sass:
+  sourcemap: never
+  quiet_deps: true
+  silence_deprecations: [import, global-builtin, color-functions, slash-div]
 
 disqus:
   shortname: https-patrickrbc-com
@@ -41,15 +43,20 @@ include: [_util]
 
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
   - jekyll-sitemap
-# Exclude from processing.
-# The following items will not be processed, by default. Create a custom list
-# to override the default setting.
-# exclude:
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      author: Patrick Costa
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor/
+  - .bundle/

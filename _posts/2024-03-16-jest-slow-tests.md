@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Migrating away from Jest and achieving over 90% reduction in running time
+description: "How migrating a server-side Node.js test suite away from Jest cut its running time by more than 90%."
 date: 2024-03-16 13:42:00 -0300
 comments: true
 ---

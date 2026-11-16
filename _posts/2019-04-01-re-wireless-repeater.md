@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Reverse engineering a wireless repeater - Part I"
+description: "First part of a series on reverse engineering an IoT wireless repeater: what firmware is and how to gather information about the target before touching the hardware."
 date:   2019-04-01 17:21:00 -0300
 comments: true
 ---
