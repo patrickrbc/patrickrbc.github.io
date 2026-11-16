@@ -1,6 +1,7 @@
 ---
 layout: post
 title: The social media trap
+description: "Thoughts on the unfair trade between users and social media platforms, and how to take back some control."
 date: 2022-12-26 21:32:00 -0300
 comments: true
 ---

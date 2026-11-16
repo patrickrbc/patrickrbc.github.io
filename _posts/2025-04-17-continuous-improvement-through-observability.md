@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Continuous improvement through observability
+description: "Practical tips for using observability to steadily reduce errors and slow queries in a platform that started without it."
 date: 2025-04-17 14:10:00 -0300
 comments: true
 ---

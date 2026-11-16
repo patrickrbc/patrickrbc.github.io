@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Reverse engineering a wireless repeater - Part II"
+description: "Second part of the wireless repeater reverse engineering series: extracting and analyzing a Linux MIPS firmware image."
 date:   2019-06-01 21:25:00 -0300
 comments: true
 ---
