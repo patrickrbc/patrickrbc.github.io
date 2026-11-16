@@ -13,7 +13,9 @@
       <div class="footer-col footer-col-1">
         <ul class="contact-list">
           <li class="p-name">
-            {%- if site.author -%}
+            {%- if site.author.name -%}
+              {{ site.author.name | escape }}
+            {%- elsif site.author -%}
               {{ site.author | escape }}
             {%- else -%}
               {{ site.title | escape }}
@@ -27,10 +29,6 @@
 
       <div class="footer-col footer-col-2">
         {%- include social.html -%}
-      </div>
-
-      <div class="footer-col footer-col-3">
-        <p>{{- site.description | escape -}}</p>
       </div>
     </div>
 
