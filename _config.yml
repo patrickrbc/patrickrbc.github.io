@@ -29,6 +29,11 @@ markdown: kramdown
 highlighter: rouge
 theme: minima
 
+sass:
+  sourcemap: never
+  quiet_deps: true
+  silence_deprecations: [import, global-builtin, color-functions, slash-div]
+
 disqus:
   shortname: https-patrickrbc-com
 
