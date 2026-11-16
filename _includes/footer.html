@@ -1,37 +1,12 @@
 <footer class="site-footer h-card">
   <data class="u-url" href="{{ "/" | relative_url }}"></data>
 
-  <div class="wrapper">
+  <div class="wrapper footer-compact">
+    <p class="footer-meta post-meta">
+      <span class="p-name">{{ site.author.name | default: site.author | default: site.title | escape }}</span>
+      · GPG 53CA 9711 9A55 0C86
+    </p>
 
-    <div class="footer-col footer-col-1 post-meta">
-      GPG: 53CA 9711 9A55 0C86
-    </div>
-
-    <!--<h2 class="footer-heading">{{ site.title | escape }}</h2>-->
-
-    <div class="footer-col-wrapper">
-      <div class="footer-col footer-col-1">
-        <ul class="contact-list">
-          <li class="p-name">
-            {%- if site.author.name -%}
-              {{ site.author.name | escape }}
-            {%- elsif site.author -%}
-              {{ site.author | escape }}
-            {%- else -%}
-              {{ site.title | escape }}
-            {%- endif -%}
-            </li>
-            {%- if site.email -%}
-            <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
-            {%- endif -%}
-        </ul>
-      </div>
-
-      <div class="footer-col footer-col-2">
-        {%- include social.html -%}
-      </div>
-    </div>
-
+    {%- include social.html -%}
   </div>
-
 </footer>

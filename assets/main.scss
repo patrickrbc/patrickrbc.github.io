@@ -40,18 +40,49 @@ pre {
   text-decoration: none;
 }
 
-.footer-col-wrapper {
-  margin-left: 0;
+.footer-compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+
+  &::after {
+    display: none;
+  }
+
+  .footer-meta {
+    margin: 0;
+  }
+
+  .social-media-list {
+    display: flex;
+    gap: 14px;
+    margin: 0;
+
+    li,
+    li + li {
+      margin: 0;
+      padding: 0;
+    }
+
+    a {
+      display: block;
+      padding: 0;
+      line-height: 0;
+    }
+
+    .svg-icon {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      display: block;
+    }
+  }
 }
 
-.footer-col {
-  float: left;
-  margin-bottom: 15px;
-  padding-left: 0;
-}
-
-.site-footer > .wrapper > .footer-col {
-  padding-left: 0;
+body.dark .svg-icon {
+  fill: #828282;
 }
 
 body.dark {
